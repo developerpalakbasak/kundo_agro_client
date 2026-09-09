@@ -2,7 +2,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useTransition } from "react";
+import { useState, useEffect, useTransition } from "react";
 import { Modal } from "@/components/modal";
 import {
     PRODUCT_CATEGORIES,
@@ -10,74 +10,78 @@ import {
     BANGLADESH_DISTRICTS,
 } from "@/lib/product-types";
 import { useLanguage } from "@/hooks/languageContext";
-
-// Dummy product data – replace with real API data later
-const demoProducts = [
-    {
-        id: "1",
-        name: "Organic Rui Fingerlings",
-        description: "Healthy 3‑inch fingerlings, fast growth, nationwide transport.",
-        price: 1500,
-        unit: "piece",
-        thumbnail: "https://images.unsplash.com/photo-1544551763-77ef2d0cfc6c?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-        category: "Fish seed / মাছের পোনা",
-        sellerName: "Ma Fatema Hatchery",
-        sellerDistrict: "Dhaka",
-        sellerPhone: "01712-345678",
-        compareAtPrice: 1700,
-    },
-    {
-        id: "2",
-        name: "Premium Rice Seeds",
-        description: "High‑yield, disease‑resistant rice seeds.",
-        price: 250,
-        unit: "kg",
-        thumbnail: "https://images.unsplash.com/photo-1497671954146-59a89ff626ff?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-        category: "Agriculture",
-        sellerName: "Green Farm",
-        sellerDistrict: "Chittagong",
-        sellerPhone: "01834-567890",
-        compareAtPrice: null,
-    },
-    {
-        id: "3",
-        name: "Soybean Seeds",
-        description: "Organic soybean seeds for small farms.",
-        price: 120,
-        unit: "kg",
-        thumbnail: "https://images.unsplash.com/photo-1578507065211-1c4e99a5fd24?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-        category: "Agriculture",
-        sellerName: "Sunny Agro",
-        sellerDistrict: "Rajshahi",
-        sellerPhone: "01987-654321",
-        compareAtPrice: 130,
-    },
-];
+import { getProducts, getCategories, createFishSeedProduct } from "@/lib/api/products";
+import { useCart } from "@/context/cartContext";
 
 export default function ProductsPage() {
     return (
-        <div className="mx-auto max-w-6xl px-4 py-8">
-            <ShopContent products={demoProducts} initialCategory="all" />
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+            <ShopContent initialCategory="all" />
         </div>
     );
 }
 
-function ShopContent({ products, initialCategory = "all" }) {
+function ShopContent({ initialCategory = "all" }) {
+    const [products, setProducts] = useState([]);
+    const [categories, setCategories] = useState(PRODUCT_CATEGORIES);
+    const [isLoading, setIsLoading] = useState(true);
+    const [loadError, setLoadError] = useState(null);
+
     const [selectedCategory, setSelectedCategory] = useState(initialCategory);
     const [selectedDistrict, setSelectedDistrict] = useState("all");
     const [searchQuery, setSearchQuery] = useState("");
     const [isDistrictDropdownOpen, setIsDistrictDropdownOpen] = useState(false);
     const [districtSearchQuery, setDistrictSearchQuery] = useState("");
-    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-    const [formError, setFormError] = useState(null);
-    const [formSuccess, setFormSuccess] = useState(false);
-    const [isPending, startTransition] = useTransition();
+    
+    // Product Detail modal state
+    const [selectedProduct, setSelectedProduct] = useState(null);
 
     const { t, language } = useLanguage();
+    const { addToCart } = useCart();
 
-    const categories = Array.from(
-        new Set([...PRODUCT_CATEGORIES, ...products.map((p) => p.category)])
-    );
+    // Fetch initial categories from backend
+    useEffect(() => {
+        getCategories()
+            .then((res) => {
+                if (res.categories && Array.isArray(res.categories)) {
+                    setCategories(Array.from(new Set([...PRODUCT_CATEGORIES, ...res.categories])));
+                }
+            })
+            .catch((err) => {
+                console.error("Failed to load categories:", err);
+            });
+    }, []);
+
+    // Fetch products from backend API
+    const loadProducts = async () => {
+        setIsLoading(true);
+        setLoadError(null);
+        try {
+            const params = {};
+            if (selectedCategory !== "all") params.category = selectedCategory;
+            if (searchQuery.trim()) params.search = searchQuery.trim();
+
+            const res = await getProducts(params);
+            if (res.data && Array.isArray(res.data)) {
+                setProducts(res.data);
+            } else {
+                setProducts([]);
+            }
+        } catch (err) {
+            setLoadError(err.message || "Failed to load products from server.");
+            setProducts([]);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            loadProducts();
+        }, 300); // debounce search query
+
+        return () => clearTimeout(timer);
+    }, [selectedCategory, searchQuery]);
 
     const sellerDistricts = Array.from(
         new Set(products.map((p) => p.sellerDistrict).filter(Boolean))
@@ -88,37 +92,51 @@ function ShopContent({ products, initialCategory = "all" }) {
     );
 
     const filteredProducts = products.filter((p) => {
-        const matchesCategory =
-            selectedCategory === "all" || p.category === selectedCategory;
         const matchesDistrict =
             selectedDistrict === "all" || p.sellerDistrict === selectedDistrict;
-        const matchesSearch =
-            p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            p.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (p.sellerName &&
-                p.sellerName.toLowerCase().includes(searchQuery.toLowerCase())) ||
-            (p.sellerDistrict &&
-                p.sellerDistrict.toLowerCase().includes(searchQuery.toLowerCase()));
-        return matchesCategory && matchesDistrict && matchesSearch;
+        return matchesDistrict;
     });
 
     const isFishSeedCategory = selectedCategory === "Fish seed / মাছের পোনা";
 
-    // Stubbed form submit – does nothing but shows success UI
+    const handleFormInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({ ...prev, [name]: value }));
+    };
+
+    // Live form submit to backend API
     async function handleFormSubmit(e) {
         e.preventDefault();
         setFormError(null);
         setFormSuccess(false);
-        startTransition(() => {
-            // Simulate a short delay
+        setIsPending(true);
+
+        try {
+            await createFishSeedProduct(formData);
+            setFormSuccess(true);
+            
+            // Refresh products from backend
+            await loadProducts();
+
             setTimeout(() => {
-                setFormSuccess(true);
-                setTimeout(() => {
-                    setIsAddModalOpen(false);
-                    setFormSuccess(false);
-                }, 1500);
-            }, 500);
-        });
+                setIsAddModalOpen(false);
+                setFormSuccess(false);
+                setFormData({
+                    name: "",
+                    description: "",
+                    price: "",
+                    unit: "piece",
+                    sellerName: "",
+                    sellerDistrict: "",
+                    sellerPhone: "",
+                    imageUrl: "",
+                });
+            }, 1200);
+        } catch (err) {
+            setFormError(err.message || "Failed to add product. Please check form inputs.");
+        } finally {
+            setIsPending(false);
+        }
     }
 
     return (
@@ -139,21 +157,6 @@ function ShopContent({ products, initialCategory = "all" }) {
                     </p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
-                    {/* Dummy Add button – kept for visual parity */}
-                    <button
-                        type="button"
-                        onClick={() => {
-                            setFormError(null);
-                            setFormSuccess(false);
-                            setIsAddModalOpen(true);
-                        }}
-                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 px-4 py-2.5 text-xs font-bold text-white shadow-md hover:from-emerald-700 hover:to-teal-800 transition-all cursor-pointer transform hover:-translate-y-0.5"
-                    >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
-                        </svg>
-                        {language === "bn" ? "মাছের পোনা পণ্য যোগ করুন (বিক্রেতা)" : "Add Fish Seed Product (Seller)"}
-                    </button>
                     {/* Search Input */}
                     <div className="relative w-full sm:w-64">
                         <input
@@ -202,7 +205,7 @@ function ShopContent({ products, initialCategory = "all" }) {
 
             {/* District Filter (only shown for fish‑seed or when districts exist) */}
             {(isFishSeedCategory || sellerDistricts.length > 0) && (
-                <div className="rounded-2xl border border-emerald-200/80 bg-gradient-to-r from-emerald-50/90 to-teal-50/40 p-4 sm:p-5 shadow-sm space-y-3">
+                <div className="rounded-2xl border border-emerald-200/80 bg-gradient-to-r from-emerald-50/90 to-teal-50/40 p-4 sm:p-5 shadow-sm space-y-3 mt-4">
                     {/* Header */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-emerald-200/60 pb-3">
                         <div className="flex items-center gap-2">
@@ -210,34 +213,18 @@ function ShopContent({ products, initialCategory = "all" }) {
                                 📍 {language === "bn" ? "বিক্রেতার জেলা দিয়ে ফিল্টার করুন:" : "Filter Sellers by District:"}
                             </span>
                         </div>
-                        <div className="flex items-center gap-3">
+                        {selectedDistrict !== "all" && (
                             <button
                                 type="button"
                                 onClick={() => {
-                                    setFormError(null);
-                                    setFormSuccess(false);
-                                    setIsAddModalOpen(true);
+                                    setSelectedDistrict("all");
+                                    setDistrictSearchQuery("");
                                 }}
-                                className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-700 px-3.5 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-emerald-800 transition-all cursor-pointer"
+                                className="text-[11px] font-semibold text-emerald-700 hover:underline cursor-pointer"
                             >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
-                                </svg>
-                                {language === "bn" ? "মাছের পোনা যোগ করুন" : "+ Add Fish Seed Product"}
+                                {language === "bn" ? "সব জেলা দেখুন" : "Clear Filter"}
                             </button>
-                            {selectedDistrict !== "all" && (
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setSelectedDistrict("all");
-                                        setDistrictSearchQuery("");
-                                    }}
-                                    className="text-[11px] font-semibold text-emerald-700 hover:underline cursor-pointer"
-                                >
-                                    {language === "bn" ? "সব জেলা দেখুন" : "Clear Filter"}
-                                </button>
-                            )}
-                        </div>
+                        )}
                     </div>
                     {/* District Dropdown */}
                     <div className="relative">
@@ -299,32 +286,8 @@ function ShopContent({ products, initialCategory = "all" }) {
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                         </svg>
                                     </div>
-                                    {/* Quick pills */}
-                                    {sellerDistricts.length > 0 && !districtSearchQuery && (
-                                        <div className="border-b border-gray-100 pb-2">
-                                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">
-                                                🔥 {language === "bn" ? "সক্রিয় বিক্রেতার জেলাসমূহ:" : "Districts with Active Sellers:"}
-                                            </p>
-                                            <div className="flex flex-wrap gap-1.5">
-                                                {sellerDistricts.map((d) => (
-                                                    <button
-                                                        key={d}
-                                                        type="button"
-                                                        onClick={() => {
-                                                            setSelectedDistrict(d);
-                                                            setIsDistrictDropdownOpen(false);
-                                                        }}
-                                                        className="rounded-lg bg-emerald-100 text-emerald-900 border border-emerald-200 px-2.5 py-1 text-[11px] font-bold hover:bg-emerald-700 hover:text-white transition-colors cursor-pointer"
-                                                    >
-                                                        {d} •
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
                                     {/* District list */}
                                     <div className="max-h-60 overflow-y-auto space-y-1 pr-1 custom-scrollbar">
-                                        {/* All option */}
                                         <button
                                             type="button"
                                             onClick={() => {
@@ -337,7 +300,6 @@ function ShopContent({ products, initialCategory = "all" }) {
                                             <span>{language === "bn" ? "সকল জেলা (All Districts)" : "All Districts of Bangladesh"}</span>
                                             {selectedDistrict === "all" && <span>✓</span>}
                                         </button>
-                                        {/* Filtered list */}
                                         {filteredDistricts.map((district) => {
                                             const sellerCount = products.filter((p) => p.sellerDistrict === district).length;
                                             return (
@@ -355,17 +317,15 @@ function ShopContent({ products, initialCategory = "all" }) {
                                                             : "hover:bg-gray-100 text-gray-700"
                                                         }`}
                                                 >
-                                                    <span>{district}</span>
-                                                    {sellerCount > 0 && (
-                                                        <span
-                                                            className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md ${selectedDistrict === district
-                                                                ? "bg-white text-emerald-900"
-                                                                : "bg-emerald-200/80 text-emerald-900"
-                                                                }`}
-                                                        >
-                                                            {sellerCount} {language === "bn" ? "বিক্রেতা" : "Seller"}
-                                                        </span>
-                                                    )}
+                                                    <span className="flex items-center gap-1.5">
+                                                        <span>{district}</span>
+                                                        {sellerCount > 0 && (
+                                                            <span className="text-[10px] bg-emerald-200 text-emerald-900 rounded-full px-1.5 py-0.2 font-bold">
+                                                                {sellerCount} {language === "bn" ? "টি" : "item"}
+                                                            </span>
+                                                        )}
+                                                    </span>
+                                                    {selectedDistrict === district && <span>✓</span>}
                                                 </button>
                                             );
                                         })}
@@ -377,87 +337,122 @@ function ShopContent({ products, initialCategory = "all" }) {
                 </div>
             )}
 
-            {/* Products Grid */}
-            {filteredProducts.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-gray-200 bg-white p-12 text-center space-y-3">
-                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 text-2xl">🐟</div>
-                    <p className="text-sm font-semibold text-gray-700">{t("catalogEmpty")}</p>
-                    <p className="text-xs text-gray-400">
-                        {language === "bn"
-                            ? "এই ক্যাটাগরিতে বা জেলায় এখনও কোন মাছের পোনা যোগ করা হয়নি।"
-                            : "No products found in this category or district."}
-                    </p>
+            {/* Products Grid / Loading Skeleton / Empty State */}
+            {isLoading ? (
+                <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    {[1, 2, 3, 4, 5, 6].map((n) => (
+                        <div key={n} className="animate-pulse rounded-2xl border border-gray-100 bg-white p-4 space-y-4 shadow-sm">
+                            <div className="h-44 rounded-xl bg-gray-200 w-full" />
+                            <div className="h-4 rounded bg-gray-200 w-3/4" />
+                            <div className="h-3 rounded bg-gray-100 w-full" />
+                            <div className="h-8 rounded-xl bg-gray-200 w-1/3" />
+                        </div>
+                    ))}
+                </div>
+            ) : loadError ? (
+                <div className="mt-12 rounded-2xl border border-red-100 bg-red-50/60 p-8 text-center max-w-md mx-auto space-y-3">
+                    <p className="text-sm font-semibold text-red-600">⚠️ {loadError}</p>
+                    <button
+                        type="button"
+                        onClick={loadProducts}
+                        className="rounded-xl bg-red-600 px-4 py-2 text-xs font-bold text-white shadow hover:bg-red-700 transition-colors"
+                    >
+                        Try Again
+                    </button>
+                </div>
+            ) : filteredProducts.length === 0 ? (
+                <div className="mt-12 text-center py-12 rounded-2xl border border-dashed border-gray-200 bg-gray-50/50">
+                    <p className="text-base font-semibold text-gray-600">No products found</p>
+                    <p className="text-xs text-gray-400 mt-1">Try resetting your filters or search query.</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     {filteredProducts.map((product) => {
-                        const isFishSeed = product.category === "Fish seed / মাছের পোনা" || product.sellerDistrict;
+                        const isFishSeed = product.category === "Fish seed / মাছের পোনা";
                         return (
                             <div
-                                key={product.id}
-                                className={`group flex flex-col overflow-hidden rounded-2xl border bg-white shadow-sm transition-all hover:shadow-md ${isFishSeed ? "border-emerald-100/80 hover:border-emerald-300" : "border-gray-100"
-                                    }`}
+                                key={product._id || product.id}
+                                onClick={() => setSelectedProduct(product)}
+                                className="group relative flex flex-col justify-between rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md cursor-pointer"
                             >
-                                {/* Thumbnail */}
-                                <div className="relative h-52 w-full overflow-hidden bg-gray-50">
-                                    <Image src={product.thumbnail} alt={product.name} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
-                                    <span className="absolute top-3 left-3 rounded-full bg-white/90 backdrop-blur-sm px-2.5 py-0.5 text-[10px] font-bold text-gray-700 shadow-sm">
+                                <div>
+                                    {/* Thumbnail Image */}
+                                    <div className="relative h-48 w-full overflow-hidden rounded-xl bg-gray-100 mb-3">
+                                        <Image
+                                            src={product.thumbnail || "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=400&q=80"}
+                                            alt={product.name}
+                                            fill
+                                            className="object-cover transition-transform duration-300 group-hover:scale-105"
+                                        />
+                                        {isFishSeed && (
+                                            <span className="absolute top-2 left-2 rounded-lg bg-emerald-600/90 px-2.5 py-1 text-[10px] font-bold text-white backdrop-blur-xs shadow-xs">
+                                                🐟 Fish Seed
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    {/* Category & Title */}
+                                    <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
                                         {product.category}
                                     </span>
-                                    {product.sellerDistrict && (
-                                        <span className="absolute top-3 right-3 rounded-full bg-emerald-900/90 text-white backdrop-blur-sm px-3 py-0.5 text-[11px] font-bold shadow-md flex items-center gap-1">
-                                            📍 {product.sellerDistrict}
-                                        </span>
-                                    )}
-                                </div>
-                                {/* Content */}
-                                <div className="flex flex-1 flex-col p-5">
-                                    <h3 className="text-base font-bold text-gray-900 group-hover:text-primary transition-colors">
+                                    <h3 className="mt-1 text-base font-bold text-foreground group-hover:text-primary transition-colors">
                                         {product.name}
                                     </h3>
-                                    {/* Seller badge */}
+                                    <p className="mt-1 text-xs text-gray-500 line-clamp-2">
+                                        {product.description}
+                                    </p>
+
+                                    {/* Seller Info if available */}
                                     {product.sellerName && (
-                                        <div className="mt-2 flex flex-col gap-1 rounded-xl bg-emerald-50/70 p-2.5 border border-emerald-100/60 text-xs">
-                                            <div className="flex items-center justify-between">
-                                                <span className="font-bold text-emerald-950 flex items-center gap-1 truncate">👨‍🌾 {product.sellerName}</span>
-                                                {product.sellerDistrict && (
-                                                    <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-md">
-                                                        {product.sellerDistrict}
-                                                    </span>
-                                                )}
+                                        <div className="mt-2.5 rounded-lg bg-emerald-50/60 p-2 text-[11px] text-emerald-950 space-y-0.5">
+                                            <div className="font-semibold flex items-center gap-1">
+                                                <span>👨‍🌾</span> <span>{product.sellerName}</span>
                                             </div>
-                                            {product.sellerPhone && (
-                                                <a href={`tel:${product.sellerPhone}`} className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 hover:text-emerald-900 hover:underline pt-0.5">
-                                                    📞 {product.sellerPhone} (কল করুন)
-                                                </a>
+                                            {product.sellerDistrict && (
+                                                <div className="text-emerald-800">
+                                                    📍 {product.sellerDistrict}
+                                                </div>
                                             )}
                                         </div>
                                     )}
-                                    <p className="mt-2 line-clamp-2 text-xs text-gray-500 flex-1">{product.description}</p>
-                                    {/* Price and actions */}
-                                    <div className="mt-4 flex items-center justify-between pt-3 border-t border-gray-100">
-                                        <div>
-                                            <span className="text-lg font-bold text-primary">৳{product.price.toLocaleString(language === "bn" ? "bn-BD" : "en-IN")}</span>
-                                            <span className="text-xs text-gray-400 font-normal ml-1">/ {product.unit}</span>
-                                            {product.compareAtPrice && (
-                                                <span className="block text-[11px] text-gray-400 line-through">৳{product.compareAtPrice}</span>
-                                            )}
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            {product.sellerPhone && (
-                                                <a href={`tel:${product.sellerPhone}`} className="rounded-xl bg-emerald-700 px-3 py-2 text-xs font-bold text-white shadow-sm hover:bg-emerald-800 transition-colors flex items-center gap-1">
-                                                    📞 {language === "bn" ? "কল দিন" : "Call"}
-                                                </a>
-                                            )}
-                                            {/* Dummy Add to Cart button – no effect */}
-                                            <button
-                                                type="button"
+                                </div>
 
-                                                className="cursor-pointer rounded-xl bg-primary px-3.5 py-2 text-xs font-bold text-white shadow-sm hover:bg-primary/90 transition-colors"
+                                {/* Price & Action */}
+                                <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
+                                    <div>
+                                        <span className="text-lg font-extrabold text-foreground">
+                                            ৳{product.price}
+                                        </span>
+                                        <span className="text-xs text-muted-foreground ml-1">
+                                            / {product.unit || "piece"}
+                                        </span>
+                                        {product.compareAtPrice && (
+                                            <span className="block text-[11px] text-gray-400 line-through">
+                                                ৳{product.compareAtPrice}
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                                        {product.sellerPhone && (
+                                            <a
+                                                href={`tel:${product.sellerPhone}`}
+                                                className="rounded-xl border border-emerald-600 bg-emerald-50 px-2.5 py-2 text-xs font-bold text-emerald-800 shadow-xs hover:bg-emerald-100 transition-colors flex items-center gap-1"
+                                                title={language === "bn" ? "বিক্রেতাকে কল করুন" : "Call Seller"}
                                             >
-                                                {t("addToCart")}
-                                            </button>
-                                        </div>
+                                                📞 {language === "bn" ? "কল" : "Call"}
+                                            </a>
+                                        )}
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                addToCart(product);
+                                            }}
+                                            className="cursor-pointer rounded-xl bg-primary px-3.5 py-2 text-xs font-bold text-white shadow-sm hover:bg-primary/90 transition-colors"
+                                        >
+                                            {t("addToCart")}
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -466,70 +461,103 @@ function ShopContent({ products, initialCategory = "all" }) {
                 </div>
             )}
 
-            {/* Add Fish Seed Modal – simplified, no real submit */}
+            {/* Product Detail Modal */}
             <Modal
-                isOpen={isAddModalOpen}
-                onClose={() => setIsAddModalOpen(false)}
-                title={language === "bn" ? "🐟 মাছের পোনা পণ্য যোগ করুন (যেকোনো জেলা)" : "🐟 Add Fish Seed Product (Any District)"}
+                isOpen={!!selectedProduct}
+                onClose={() => setSelectedProduct(null)}
+                title={selectedProduct?.name || "Product Details"}
                 maxWidth="lg"
             >
-                <form onSubmit={handleFormSubmit} className="space-y-4">
-                    <p className="text-xs text-gray-500 leading-relaxed">
-                        {language === "bn"
-                            ? "বাংলাদেশের যেকোনো জেলার হ্যাচারি বা পোনা বিক্রেতা নিচে আপনার মাছের পোনার তথ্য পূরণ করে পণ্য প্রকাশ করতে পারেন।"
-                            : "Hatchery owners and fish seed suppliers from any district of Bangladesh can list fish seed products below."}
-                    </p>
-                    {formError && (
-                        <div className="rounded-xl bg-red-50 border border-red-200 p-3 text-xs font-semibold text-red-700">
-                            ⚠️ {formError}
+                {selectedProduct && (
+                    <div className="space-y-5">
+                        {/* Image Preview & Quick Summary */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
+                            <div className="relative h-56 sm:h-64 w-full overflow-hidden rounded-2xl bg-gray-100 shadow-sm border border-gray-100">
+                                <Image
+                                    src={selectedProduct.thumbnail || "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=400&q=80"}
+                                    alt={selectedProduct.name}
+                                    fill
+                                    className="object-cover"
+                                />
+                            </div>
+
+                            <div className="space-y-3">
+                                <span className="inline-block rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
+                                    {selectedProduct.category}
+                                </span>
+
+                                <h2 className="text-xl font-extrabold text-foreground">
+                                    {selectedProduct.name}
+                                </h2>
+
+                                <div className="flex items-baseline gap-2">
+                                    <span className="text-2xl font-black text-primary">
+                                        ৳{selectedProduct.price}
+                                    </span>
+                                    <span className="text-xs text-muted-foreground">
+                                        / {selectedProduct.unit || "piece"}
+                                    </span>
+                                    {selectedProduct.compareAtPrice && (
+                                        <span className="text-xs text-gray-400 line-through ml-2">
+                                            ৳{selectedProduct.compareAtPrice}
+                                        </span>
+                                    )}
+                                </div>
+
+                                {/* Seller Details Box if present */}
+                                {selectedProduct.sellerName && (
+                                    <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-3 text-xs space-y-1">
+                                        <p className="font-bold text-emerald-950 flex items-center gap-1.5">
+                                            👨‍🌾 {selectedProduct.sellerName}
+                                        </p>
+                                        {selectedProduct.sellerDistrict && (
+                                            <p className="text-emerald-800 font-medium">
+                                                📍 {language === "bn" ? "জেলা:" : "District:"} {selectedProduct.sellerDistrict}
+                                            </p>
+                                        )}
+                                        {selectedProduct.sellerPhone && (
+                                            <p className="text-emerald-900 font-bold">
+                                                📞 {selectedProduct.sellerPhone}
+                                            </p>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
                         </div>
-                    )}
-                    {formSuccess && (
-                        <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-3 text-xs font-semibold text-emerald-800 flex items-center gap-2">
-                            ✅ {language === "bn" ? "আপনার মাছের পোনা সফলভাবে যোগ করা হয়েছে!" : "Fish seed product added successfully!"}
+
+                        {/* Full Description Section */}
+                        <div className="border-t border-gray-100 pt-4 space-y-1.5">
+                            <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">
+                                {language === "bn" ? "পণ্যের বিস্তারিত বিবরণ" : "Product Description"}
+                            </h4>
+                            <p className="text-xs sm:text-sm text-gray-600 leading-relaxed whitespace-pre-line">
+                                {selectedProduct.description || (language === "bn" ? "কোন বিশেষ বিবরণ দেওয়া নেই।" : "No additional description provided.")}
+                            </p>
                         </div>
-                    )}
-                    {/* Minimal fields for UI – real fields omitted for brevity */}
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <div className="sm:col-span-2">
-                            <label className="block text-xs font-semibold text-gray-700 mb-1">
-                                {language === "bn" ? "বিক্রেতা / হ্যাচারির নাম *" : "Seller / Hatchery Name *"}
-                            </label>
-                            <input type="text" name="sellerName" required className="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2 text-xs outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20" />
-                        </div>
-                        <div>
-                            <label className="block text-xs font-semibold text-gray-700 mb-1">
-                                {language === "bn" ? "জেলা (District) *" : "District *"}
-                            </label>
-                            <select name="sellerDistrict" required className="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2 text-xs outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20">
-                                <option value="" disabled>{language === "bn" ? "-- জেলা নির্বাচন করুন --" : "-- Select District --"}</option>
-                                {BANGLADESH_DISTRICTS.map((d) => (
-                                    <option key={d} value={d}>{d}</option>
-                                ))}
-                            </select>
-                        </div>
-                        <div className="sm:col-span-2">
-                            <label className="block text-xs font-semibold text-gray-700 mb-1">
-                                {language === "bn" ? "যোগাযোগের মোবাইল নম্বর *" : "Contact Mobile Phone Number *"}
-                            </label>
-                            <input type="tel" name="sellerPhone" required className="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2 text-xs outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20" />
+
+                        {/* Action Buttons */}
+                        <div className="sticky bottom-0 bg-white/95 backdrop-blur-sm flex items-center justify-end gap-3 pt-4 border-t border-gray-100 z-10">
+                            {selectedProduct.sellerPhone && (
+                                <a
+                                    href={`tel:${selectedProduct.sellerPhone}`}
+                                    className="rounded-xl border border-emerald-600 bg-emerald-50 px-4 py-2.5 text-xs font-bold text-emerald-800 shadow-xs hover:bg-emerald-100 transition-colors flex items-center gap-1.5"
+                                >
+                                    📞 {language === "bn" ? "বিক্রেতাকে কল করুন" : "Call Seller"}
+                                </a>
+                            )}
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    addToCart(selectedProduct);
+                                    setSelectedProduct(null);
+                                }}
+                                className="cursor-pointer rounded-xl bg-primary px-5 py-2.5 text-xs font-bold text-white shadow-md hover:bg-primary/90 transition-colors"
+                            >
+                                {t("addToCart")}
+                            </button>
                         </div>
                     </div>
-                    <div className="sticky bottom-0 bg-white/95 backdrop-blur-sm flex items-center justify-end gap-3 pt-3 pb-1 border-t border-gray-100 z-10">
-                        <button type="button" onClick={() => setIsAddModalOpen(false)} className="rounded-xl border border-gray-200 px-4 py-2 text-xs font-semibold text-gray-600 hover:bg-gray-50 cursor-pointer">
-                            {t("close")}
-                        </button>
-                        <button type="submit" disabled={isPending} className="rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 px-6 py-2 text-xs font-bold text-white shadow-md hover:from-emerald-700 hover:to-teal-800 disabled:opacity-50 cursor-pointer">
-                            {isPending
-                                ? language === "bn"
-                                    ? "যোগ করা হচ্ছে..."
-                                    : "Saving..."
-                                : language === "bn"
-                                    ? "পণ্য প্রকাশ করুন"
-                                    : "Publish Fish Seed"}
-                        </button>
-                    </div>
-                </form>
+                )}
             </Modal>
         </div>
     );

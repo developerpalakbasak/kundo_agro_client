@@ -34,7 +34,7 @@ export function Modal({
   // Close on Escape key
   useEffect(() => {
     if (!isOpen) return;
-    function handleKey() {
+    function handleKey(e) {
       if (e.key === "Escape") onClose();
     }
     window.addEventListener("keydown", handleKey);

@@ -70,8 +70,8 @@ export function CustomerAuthModal({ isOpen, onClose, initialMode = "login", onAu
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-      <div className="relative w-full max-w-md rounded-2xl border border-gray-100 bg-white p-6 shadow-xl sm:p-8">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm animate-fade-in">
+      <div className="relative w-full max-w-md rounded-2xl border border-gray-100 bg-white p-6 shadow-xl sm:p-8 animate-modal-in">
         {/* Close Button */}
         <button
           type="button"

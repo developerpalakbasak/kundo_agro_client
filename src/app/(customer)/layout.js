@@ -25,8 +25,10 @@ export const metadata = {
 };
 
 import { LanguageProvider } from "../../hooks/languageContext";
+import { CartProvider } from "@/context/cartContext";
 import { CustomerHeader } from "@/components/customer/Navbar";
 import { CustomerFooter } from "@/components/customer/Footer";
+import { CartDrawer } from "@/components/customer/CartDrawer";
 
 export default function RootLayout({ children }) {
   return (
@@ -36,9 +38,12 @@ export default function RootLayout({ children }) {
     >
       <body className="min-h-full flex flex-col">
         <LanguageProvider>
-          <CustomerHeader />
-          {children}
-          <CustomerFooter />
+          <CartProvider>
+            <CustomerHeader />
+            <CartDrawer />
+            {children}
+            <CustomerFooter />
+          </CartProvider>
         </LanguageProvider>
       </body>
     </html>
