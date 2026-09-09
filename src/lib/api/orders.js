@@ -20,3 +20,10 @@ export async function getMyOrders() {
 export async function trackOrder(orderId) {
   return api.get(`/orders/track/${orderId}`);
 }
+
+/**
+ * Initialize SSLCommerz Payment Session
+ */
+export async function initSSLCommerzPayment(orderId) {
+  return api.post(`/orders/init-payment/${orderId}`);
+}

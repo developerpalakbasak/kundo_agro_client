@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/cartContext";
 import { useLanguage } from "@/hooks/languageContext";
-import { createOrder } from "@/lib/api/orders";
+import { createOrder, initSSLCommerzPayment } from "@/lib/api/orders";
 import { getImageUrl } from "@/lib/api/axios";
 
 export default function CheckoutPage() {
@@ -81,8 +81,29 @@ export default function CheckoutPage() {
       const res = await createOrder(payload);
 
       if (res?.success || res?.order) {
-        const createdOrderId = res?.order?.orderId || "";
+        const createdOrder = res.order;
+        const createdOrderId = createdOrder?.orderId || "";
         clearCart();
+
+        // Check if digital payment (bKash / Nagad) selected
+        if (formData.paymentMethod === "bKash" || formData.paymentMethod === "Nagad") {
+          try {
+            const payRes = await initSSLCommerzPayment(createdOrderId);
+            const redirectUrl = payRes?.gatewayUrl || payRes?.data?.gatewayUrl;
+            if (redirectUrl) {
+              window.location.href = redirectUrl;
+              return;
+            } else {
+              setErrorMessage(payRes?.message || payRes?.failedreason || "Payment gateway redirect failed.");
+              return;
+            }
+          } catch (payErr) {
+            console.error("SSLCommerz payment init error:", payErr);
+            setErrorMessage(payErr.message || "Failed to initialize online payment.");
+            return;
+          }
+        }
+
         router.push(`/orders?placed=${encodeURIComponent(createdOrderId)}`);
       } else {
         setErrorMessage(res?.message || "Failed to place order.");
