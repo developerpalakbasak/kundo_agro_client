@@ -6,6 +6,8 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/hooks/languageContext";
 import { LanguageToggle } from "@/hooks/languageToggle";
+import { CustomerAuthModal } from "./CustomerAuthModal";
+import { getCurrentUser, logoutUser } from "@/lib/api/auth";
 
 const navLinks = [
   { href: "/", key: "home" },
@@ -25,7 +27,25 @@ export function CustomerHeader() {
   const { t } = useLanguage();
 //   const { totalItems, setIsCartOpen } = useCart();
 
+  useEffect(() => {
+    // Check active user session on mount
+    getCurrentUser()
+      .then((res) => {
+        if (res.user) setUser(res.user);
+      })
+      .catch(() => {
+        setUser(null);
+      });
+  }, []);
 
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+      setUser(null);
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
+  };
 
   const visibleNavLinks = navLinks.filter((link) => {
     if (link.href === "/orders" && !user) return false;
@@ -85,14 +105,13 @@ export function CustomerHeader() {
                 <span className="hidden sm:inline text-xs font-semibold text-gray-700 bg-gray-100 rounded-full px-3 py-1">
                   👤 {user.name}
                 </span>
-                <form action={logoutCustomerAction}>
-                  <button
-                    type="submit"
-                    className="cursor-pointer rounded-xl border border-gray-200 px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition-colors"
-                  >
-                    Logout
-                  </button>
-                </form>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="cursor-pointer rounded-xl border border-gray-200 px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition-colors"
+                >
+                  Logout
+                </button>
               </div>
             ) : (
               <button
@@ -107,7 +126,7 @@ export function CustomerHeader() {
             {/* Cart Icon Trigger */}
             <button
               type="button"
-              onClick={() => setIsCartOpen(true)}
+              onClick={() => setIsCartOpen && setIsCartOpen(true)}
               aria-label="Open Shopping Cart"
               className="relative flex items-center justify-center rounded-xl bg-gray-50 border border-gray-200/80 p-2 text-gray-700 hover:bg-gray-100 hover:text-primary transition-colors cursor-pointer"
             >
@@ -119,11 +138,6 @@ export function CustomerHeader() {
                   d="M16 11V7a4 4 0 00-8 0v4M5 11h14l1 12H4L5 11z"
                 />
               </svg>
-               (
-                <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white shadow-sm animate-pulse">
-                  50
-                </span>
-              )
             </button>
 
             {/* Mobile Hamburger Toggle */}
@@ -156,6 +170,13 @@ export function CustomerHeader() {
         )}
       </header>
 
+      {/* Customer Authentication Modal */}
+      <CustomerAuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        onAuthSuccess={(authenticatedUser) => setUser(authenticatedUser)}
+      />
     </>
   );
 }
+
