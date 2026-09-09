@@ -110,7 +110,7 @@ export default function OrdersPage() {
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
-            📦 {language === "bn" ? "আমার অর্ডারসমূহ" : "My Orders"}
+            {language === "bn" ? "আমার অর্ডারসমূহ" : "My Orders"}
           </h1>
           <p className="text-xs text-gray-500 mt-1">
             {language === "bn"
@@ -149,33 +149,30 @@ export default function OrdersPage() {
         <button
           type="button"
           onClick={() => setFilter("all")}
-          className={`rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
-            filter === "all"
+          className={`rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${filter === "all"
               ? "bg-white text-foreground shadow-xs"
               : "text-muted-foreground hover:text-foreground"
-          }`}
+            }`}
         >
           {language === "bn" ? "সকল অর্ডার" : "All Orders"}
         </button>
         <button
           type="button"
           onClick={() => setFilter("processing")}
-          className={`rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
-            filter === "processing"
+          className={`rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${filter === "processing"
               ? "bg-white text-foreground shadow-xs"
               : "text-muted-foreground hover:text-foreground"
-          }`}
+            }`}
         >
           {language === "bn" ? "প্রসেসিং" : "Processing"}
         </button>
         <button
           type="button"
           onClick={() => setFilter("completed")}
-          className={`rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
-            filter === "completed"
+          className={`rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${filter === "completed"
               ? "bg-white text-foreground shadow-xs"
               : "text-muted-foreground hover:text-foreground"
-          }`}
+            }`}
         >
           {language === "bn" ? "সম্পন্ন / নামঞ্জুর" : "Completed / Cancelled"}
         </button>

@@ -98,11 +98,10 @@ export function CustomerHeader() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`text-sm font-semibold transition-colors whitespace-nowrap ${
-                    isActive
-                      ? "text-primary font-bold"
-                      : "text-gray-600 hover:text-primary"
-                  }`}
+                  className={`text-sm font-semibold transition-colors whitespace-nowrap ${isActive
+                    ? "text-primary font-bold"
+                    : "text-gray-600 hover:text-primary"
+                    }`}
                 >
                   {t(link.key)}
                 </Link>
@@ -114,17 +113,15 @@ export function CustomerHeader() {
               <button
                 type="button"
                 onClick={() => setPortalsDropdownOpen(!portalsDropdownOpen)}
-                className={`flex items-center gap-1.5 text-sm font-semibold transition-colors cursor-pointer py-1.5 px-2.5 rounded-xl hover:bg-gray-50 ${
-                  pathname.startsWith("/seller") || pathname.startsWith("/admin")
-                    ? "text-primary bg-primary/5"
-                    : "text-gray-600 hover:text-primary"
-                }`}
+                className={`flex items-center gap-1.5 text-sm font-semibold transition-colors cursor-pointer py-1.5 px-2.5 rounded-xl hover:bg-gray-50 ${pathname.startsWith("/seller") || pathname.startsWith("/admin")
+                  ? "text-primary bg-primary/5"
+                  : "text-gray-600 hover:text-primary"
+                  }`}
               >
                 <span>{language === "bn" ? "পোর্টালসমূহ" : "Portals"}</span>
                 <svg
-                  className={`w-4 h-4 transition-transform duration-200 ${
-                    portalsDropdownOpen ? "rotate-180" : ""
-                  }`}
+                  className={`w-4 h-4 transition-transform duration-200 ${portalsDropdownOpen ? "rotate-180" : ""
+                    }`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -202,9 +199,8 @@ export function CustomerHeader() {
                     </div>
                     <span className="truncate max-w-[120px]">{user.name}</span>
                     <svg
-                      className={`w-3.5 h-3.5 transition-transform duration-200 ${
-                        userDropdownOpen ? "rotate-180" : ""
-                      }`}
+                      className={`w-3.5 h-3.5 transition-transform duration-200 ${userDropdownOpen ? "rotate-180" : ""
+                        }`}
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -224,14 +220,14 @@ export function CustomerHeader() {
                         onClick={() => setUserDropdownOpen(false)}
                         className="flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors"
                       >
-                        📦 {language === "bn" ? "আমার অর্ডারসমূহ" : "My Orders"}
+                        {language === "bn" ? "আমার অর্ডারসমূহ" : "My Orders"}
                       </Link>
                       <button
                         type="button"
                         onClick={handleLogout}
                         className="w-full text-left flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
                       >
-                        🚪 {language === "bn" ? "লগ আউট" : "Log out"}
+                        {language === "bn" ? "লগ আউট" : "Log out"}
                       </button>
                     </div>
                   )}
@@ -256,19 +252,16 @@ export function CustomerHeader() {
             >
               <div className="relative w-5 h-4 flex flex-col justify-between">
                 <span
-                  className={`h-0.5 w-full bg-current rounded-full transition-transform duration-300 ${
-                    mobileMenuOpen ? "rotate-45 translate-y-1.5" : ""
-                  }`}
+                  className={`h-0.5 w-full bg-current rounded-full transition-transform duration-300 ${mobileMenuOpen ? "rotate-45 translate-y-1.5" : ""
+                    }`}
                 />
                 <span
-                  className={`h-0.5 w-full bg-current rounded-full transition-opacity duration-300 ${
-                    mobileMenuOpen ? "opacity-0" : "opacity-100"
-                  }`}
+                  className={`h-0.5 w-full bg-current rounded-full transition-opacity duration-300 ${mobileMenuOpen ? "opacity-0" : "opacity-100"
+                    }`}
                 />
                 <span
-                  className={`h-0.5 w-full bg-current rounded-full transition-transform duration-300 ${
-                    mobileMenuOpen ? "-rotate-45 -translate-y-2" : ""
-                  }`}
+                  className={`h-0.5 w-full bg-current rounded-full transition-transform duration-300 ${mobileMenuOpen ? "-rotate-45 -translate-y-2" : ""
+                    }`}
                 />
               </div>
             </button>
@@ -331,11 +324,10 @@ export function CustomerHeader() {
                       key={link.href}
                       href={link.href}
                       onClick={() => setMobileMenuOpen(false)}
-                      className={`block rounded-xl px-3.5 py-2 text-sm font-semibold transition-colors ${
-                        isActive
-                          ? "bg-primary/10 text-primary"
-                          : "text-gray-700 hover:bg-gray-50 hover:text-primary"
-                      }`}
+                      className={`block rounded-xl px-3.5 py-2 text-sm font-semibold transition-colors ${isActive
+                        ? "bg-primary/10 text-primary"
+                        : "text-gray-700 hover:bg-gray-50 hover:text-primary"
+                        }`}
                     >
                       {t(link.key)}
                     </Link>
