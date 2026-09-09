@@ -1,7 +1,5 @@
 import { LanguageProvider } from "@/hooks/languageContext";
-import Home from "../components/Home";
-import { CustomerHeader } from "@/components/customer/Navbar";
-import { CustomerFooter } from "@/components/customer/Footer";
+import Home from "../../components/Home";
 
 // Demo data for preview – replace with real API data later
 const demoProducts = [
@@ -29,9 +27,8 @@ export default function HomePage() {
   return (
     <div>
       <LanguageProvider>
-        <CustomerHeader/>
         <Home featuredProducts={demoProducts} latestBlogs={[]} />
-        <CustomerFooter/>
+
       </LanguageProvider>
     </div>
   );
