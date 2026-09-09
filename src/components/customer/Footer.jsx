@@ -21,7 +21,7 @@ export function CustomerFooter() {
                                 height={32}
                                 className="rounded-lg object-contain"
                             />
-                            <h3 className="text-base font-bold text-gray-900">{t("brandName")}</h3>
+                            <h3 className="text-base font-bold tracking-tight text-foreground group-hover:text-primary transition-colors">{t("brandName")}</h3>
                         </div>
                         <p className="mt-2 text-xs text-gray-500 leading-relaxed">
                             {t("heroSubtitle")}

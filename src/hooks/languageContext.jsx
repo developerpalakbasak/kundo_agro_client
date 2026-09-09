@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import { translations } from "@/lib/translations";
 
 
@@ -9,15 +9,18 @@ const LanguageContext = createContext();
 const LANGUAGE_STORAGE_KEY = "kundu_agro_lang";
 
 export function LanguageProvider({ children }) {
-  const [language, setLanguageState] = useState(() => {
+  const [language, setLanguageState] = useState("en");
+
+  // Sync with localStorage after component mounts (client‑only)
+  useEffect(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem(LANGUAGE_STORAGE_KEY);
       if (saved === "en" || saved === "bn") {
-        return saved;
+        setLanguageState(saved);
       }
     }
-    return "en";
-  });
+  }, []);
+
 
     const setLanguage = (lang) => {
     setLanguageState(lang);
