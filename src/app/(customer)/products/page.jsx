@@ -83,6 +83,10 @@ function ShopContent({ products, initialCategory = "all" }) {
         new Set(products.map((p) => p.sellerDistrict).filter(Boolean))
     ).sort();
 
+    const filteredDistricts = BANGLADESH_DISTRICTS.filter((d) =>
+        d.toLowerCase().includes(districtSearchQuery.toLowerCase())
+    );
+
     const filteredProducts = products.filter((p) => {
         const matchesCategory =
             selectedCategory === "all" || p.category === selectedCategory;
@@ -175,8 +179,8 @@ function ShopContent({ products, initialCategory = "all" }) {
                         setSelectedDistrict("all");
                     }}
                     className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer ${selectedCategory === "all"
-                            ? "bg-primary text-white shadow-sm"
-                            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                        ? "bg-primary text-white shadow-sm"
+                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                         }`}
                 >
                     {t("allCategories")}
@@ -187,8 +191,8 @@ function ShopContent({ products, initialCategory = "all" }) {
                         type="button"
                         onClick={() => setSelectedCategory(cat)}
                         className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer ${selectedCategory === cat
-                                ? "bg-primary text-white shadow-sm"
-                                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                            ? "bg-primary text-white shadow-sm"
+                            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                             }`}
                     >
                         {cat}
@@ -345,18 +349,18 @@ function ShopContent({ products, initialCategory = "all" }) {
                                                         setIsDistrictDropdownOpen(false);
                                                     }}
                                                     className={`w-full flex items-center justify-between rounded-xl px-3 py-2 text-xs transition-colors cursor-pointer ${selectedDistrict === district
-                                                            ? "bg-emerald-700 text-white font-bold"
-                                                            : sellerCount > 0
-                                                                ? "bg-emerald-50/80 text-emerald-950 font-bold hover:bg-emerald-100"
-                                                                : "hover:bg-gray-100 text-gray-700"
+                                                        ? "bg-emerald-700 text-white font-bold"
+                                                        : sellerCount > 0
+                                                            ? "bg-emerald-50/80 text-emerald-950 font-bold hover:bg-emerald-100"
+                                                            : "hover:bg-gray-100 text-gray-700"
                                                         }`}
                                                 >
                                                     <span>{district}</span>
                                                     {sellerCount > 0 && (
                                                         <span
                                                             className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md ${selectedDistrict === district
-                                                                    ? "bg-white text-emerald-900"
-                                                                    : "bg-emerald-200/80 text-emerald-900"
+                                                                ? "bg-white text-emerald-900"
+                                                                : "bg-emerald-200/80 text-emerald-900"
                                                                 }`}
                                                         >
                                                             {sellerCount} {language === "bn" ? "বিক্রেতা" : "Seller"}
