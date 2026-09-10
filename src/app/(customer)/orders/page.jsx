@@ -8,6 +8,7 @@ import { Modal } from "@/components/modal";
 import { useLanguage } from "@/hooks/languageContext";
 import { getMyOrders, trackOrder } from "@/lib/api/orders";
 import { printOrderInvoice } from "@/lib/invoice";
+import Loader from "@/components/Loader";
 
 export default function OrdersPage() {
   const { t, language } = useLanguage();
@@ -105,7 +106,7 @@ export default function OrdersPage() {
   };
 
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Header & Order Tracking Bar */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
@@ -145,13 +146,13 @@ export default function OrdersPage() {
       )}
 
       {/* Filter Tabs */}
-      <div className="inline-flex rounded-xl bg-gray-100 p-1 border border-gray-200/80">
+      <div className="inline-flex w-full rounded-xl bg-gray-100 p-1 border border-gray-200/80">
         <button
           type="button"
           onClick={() => setFilter("all")}
           className={`rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${filter === "all"
-              ? "bg-white text-foreground shadow-xs"
-              : "text-muted-foreground hover:text-foreground"
+            ? "bg-white text-foreground shadow-xs"
+            : "text-muted-foreground hover:text-foreground"
             }`}
         >
           {language === "bn" ? "সকল অর্ডার" : "All Orders"}
@@ -160,8 +161,8 @@ export default function OrdersPage() {
           type="button"
           onClick={() => setFilter("processing")}
           className={`rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${filter === "processing"
-              ? "bg-white text-foreground shadow-xs"
-              : "text-muted-foreground hover:text-foreground"
+            ? "bg-white text-foreground shadow-xs"
+            : "text-muted-foreground hover:text-foreground"
             }`}
         >
           {language === "bn" ? "প্রসেসিং" : "Processing"}
@@ -170,8 +171,8 @@ export default function OrdersPage() {
           type="button"
           onClick={() => setFilter("completed")}
           className={`rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${filter === "completed"
-              ? "bg-white text-foreground shadow-xs"
-              : "text-muted-foreground hover:text-foreground"
+            ? "bg-white text-foreground shadow-xs"
+            : "text-muted-foreground hover:text-foreground"
             }`}
         >
           {language === "bn" ? "সম্পন্ন / নামঞ্জুর" : "Completed / Cancelled"}
@@ -180,14 +181,8 @@ export default function OrdersPage() {
 
       {/* Orders List Container */}
       {isLoading ? (
-        <div className="space-y-4">
-          {[1, 2].map((n) => (
-            <div key={n} className="animate-pulse rounded-2xl border border-gray-100 bg-white p-5 space-y-3 shadow-xs">
-              <div className="h-4 bg-gray-200 rounded w-1/4" />
-              <div className="h-16 bg-gray-100 rounded-xl w-full" />
-              <div className="h-4 bg-gray-200 rounded w-1/6" />
-            </div>
-          ))}
+        <div className="flex justify-center items-center py-20">
+          <Loader size="lg" text={language === "bn" ? "অর্ডার লোড হচ্ছে..." : "Loading orders..."} />
         </div>
       ) : loadError ? (
         <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-8 text-center max-w-md mx-auto space-y-3">
@@ -199,7 +194,7 @@ export default function OrdersPage() {
           </p>
         </div>
       ) : filteredOrders.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-white px-6 py-16 text-center space-y-4 shadow-sm">
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-white py-16 text-center space-y-4 shadow-sm">
           <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary text-2xl">
             📦
           </div>
@@ -221,11 +216,11 @@ export default function OrdersPage() {
           </Link>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-4 w-full">
           {filteredOrders.map((order) => (
             <div
               key={order._id || order.orderId}
-              className="group rounded-2xl border border-gray-100 bg-white p-5 shadow-xs transition-all hover:border-gray-200 hover:shadow-md space-y-4"
+              className="group w-full min-w-0 rounded-2xl border border-gray-100 bg-white p-5 shadow-xs transition-all hover:border-gray-200 hover:shadow-md space-y-4"
             >
               {/* Top row info */}
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 pb-3">
@@ -246,11 +241,11 @@ export default function OrdersPage() {
               </div>
 
               {/* Items summary */}
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="grid w-full min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 {order.items.map((item, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center gap-3 rounded-xl bg-gray-50/70 p-2.5 border border-gray-100"
+                    className="flex w-full min-w-0 items-center gap-3 rounded-xl border border-gray-100 bg-gray-50/70 p-2.5"
                   >
                     <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg bg-white border border-gray-100">
                       <Image
