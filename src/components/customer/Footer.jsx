@@ -50,7 +50,7 @@ export function CustomerFooter() {
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/admin" className="hover:text-primary transition-colors">
+                                <Link href="/admin/login" className="hover:text-primary transition-colors">
                                     {t("adminPanel")}
                                 </Link>
                             </li>

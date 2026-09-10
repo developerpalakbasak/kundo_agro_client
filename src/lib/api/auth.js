@@ -1,11 +1,15 @@
 import api from "./axios";
 
-export async function loginUser({ email, password }) {
-  return api.post("/auth/login", { email, password });
+export async function loginUser({ email, identifier, password }) {
+  return api.post("/auth/login", { 
+    email: email || identifier,
+    identifier: identifier || email, 
+    password 
+  });
 }
 
-export async function registerUser({ name, email, password, phone }) {
-  return api.post("/auth/register", { name, email, password, phone });
+export async function registerUser({ name, email, password, phone, role }) {
+  return api.post("/auth/register", { name, email, password, phone, role });
 }
 
 export async function logoutUser() {
@@ -15,3 +19,4 @@ export async function logoutUser() {
 export async function getCurrentUser() {
   return api.get("/auth/me");
 }
+

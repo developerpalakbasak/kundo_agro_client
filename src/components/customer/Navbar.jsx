@@ -144,7 +144,7 @@ export function CustomerHeader() {
                     </div>
                   </Link>
                   <Link
-                    href="/admin"
+                    href="/admin/login"
                     onClick={() => setPortalsDropdownOpen(false)}
                     className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-bold text-gray-700 hover:bg-primary/10 hover:text-primary transition-colors"
                   >
@@ -348,7 +348,7 @@ export function CustomerHeader() {
                   🐟 {language === "bn" ? "পোনা বিক্রেতা পোর্টাল" : "Fish Seed Seller Portal"}
                 </Link>
                 <Link
-                  href="/admin"
+                  href="/admin/login"
                   onClick={() => setMobileMenuOpen(false)}
                   className="flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 transition-colors"
                 >
