@@ -45,7 +45,9 @@ export default function OrdersPage() {
   };
 
   useEffect(() => {
-    fetchOrders();
+    (async () => {
+      await fetchOrders();
+    })();
   }, []);
 
   const handleTrackSubmit = async (e) => {

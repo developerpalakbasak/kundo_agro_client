@@ -1,12 +1,23 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { getDashboardStats } from "@/lib/api/admin";
+import { DashboardContent } from "@/components/admin/DashboardContent";
 
 export default function AdminDashboardPage() {
   const router = useRouter();
   const { user, loading, isAdmin } = useAuth();
+  const [stats, setStats] = useState({
+    productCount: 0,
+    userCount: 0,
+    blogCount: 0,
+    orderCount: 0,
+    totalRevenue: 0,
+    breakdown: {},
+  });
+  const [isStatsLoading, setIsStatsLoading] = useState(true);
 
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) {
@@ -14,28 +25,44 @@ export default function AdminDashboardPage() {
     }
   }, [user, loading, isAdmin, router]);
 
+  useEffect(() => {
+    if (user && isAdmin) {
+      getDashboardStats()
+        .then((data) => {
+          if (data && data.stats) {
+            setStats(data.stats);
+          } else if (data) {
+            setStats(data);
+          }
+        })
+        .catch((err) => {
+          console.error("Failed to load dashboard stats:", err);
+        })
+        .finally(() => {
+          setIsStatsLoading(false);
+        });
+    }
+  }, [user, isAdmin]);
+
   if (loading || !user || !isAdmin) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-900 text-emerald-400">
+      <div className="flex min-h-[400px] items-center justify-center text-emerald-600">
         <div className="flex flex-col items-center gap-3">
-          <svg className="animate-spin h-8 w-8" viewBox="0 0 24 24" fill="none">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            />
-          </svg>
-          <span className="text-xs font-semibold tracking-wider text-slate-300">Checking authorization...</span>
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-emerald-600 border-t-transparent" />
+          <span className="text-xs font-semibold text-gray-500">Checking authorization...</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-8 text-white">
-      <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-      <p className="mt-2 text-slate-400">Welcome, {user.name} ({user.role})</p>
-    </div>
+    <DashboardContent
+      productCount={stats.productCount || stats.products || 0}
+      userCount={stats.userCount || stats.users || 0}
+      blogCount={stats.blogCount || stats.blogs || 0}
+      orderCount={stats.orderCount || stats.orders || 0}
+      totalRevenue={stats.totalRevenue || 0}
+      breakdown={stats.breakdown}
+    />
   );
 }

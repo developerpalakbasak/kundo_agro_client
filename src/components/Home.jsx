@@ -84,7 +84,7 @@ export default function Home({
                         return (
                             <Link
                                 key={cat}
-                                href={`/products?category=${encodeURIComponent(cat)}`}
+                                href={`/products/${encodeURIComponent(cat)}`}
                                 className="group flex items-center gap-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition-all hover:border-primary/40 hover:shadow-md"
                             >
                                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-2xl group-hover:bg-primary group-hover:text-white transition-colors">

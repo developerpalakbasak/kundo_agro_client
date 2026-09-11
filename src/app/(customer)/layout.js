@@ -41,7 +41,7 @@ export default function RootLayout({ children }) {
           <CartProvider>
             <CustomerHeader />
             <CartDrawer />
-            {children}
+            <main className="flex-1 w-full">{children}</main>
             <CustomerFooter />
           </CartProvider>
         </LanguageProvider>

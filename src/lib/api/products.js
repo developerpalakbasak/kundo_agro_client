@@ -13,7 +13,6 @@ export async function getProducts(params = {}) {
 export async function getCategories() {
   return api.get("/products/categories");
 }
-
 /**
  * Fetch single product by ID or Slug
  */
@@ -22,8 +21,23 @@ export async function getProductByIdOrSlug(idOrSlug) {
 }
 
 /**
+ * Fetch districts list from server
+ */
+export async function getDistricts() {
+  return api.get("/products/districts");
+}
+
+/**
+ * Fetch product units list from server
+ */
+export async function getUnits() {
+  return api.get("/products/units");
+}
+
+/**
  * Create/post a fish seed product (Seller/Customer)
  */
 export async function createFishSeedProduct(productData) {
   return api.post("/products/fish-seed", productData);
 }
+

@@ -1,4 +1,5 @@
 import { AuthProvider } from "@/context/AuthContext";
+import { AdminLayoutWrapper } from "@/components/admin/AdminLayoutWrapper";
 import "../globals.css";
 
 export const metadata = {
@@ -9,9 +10,9 @@ export const metadata = {
 export default function AdminRootLayout({ children }) {
   return (
     <html lang="en" className="h-full antialiased">
-      <body className="min-h-full bg-slate-900 font-sans text-slate-100">
+      <body className="min-h-full font-sans">
         <AuthProvider>
-          {children}
+          <AdminLayoutWrapper>{children}</AdminLayoutWrapper>
         </AuthProvider>
       </body>
     </html>
