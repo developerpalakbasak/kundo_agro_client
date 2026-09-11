@@ -85,9 +85,13 @@ export async function updateOrderPaymentStatus(orderId, paymentStatus) {
   return api.patch(`/admin/orders/${orderId}/payment`, { paymentStatus });
 }
 
-// ── Users Management ──────────────────────────────────────────
+// ── Users & Password Management ──────────────────────────────
 export async function getAdminUsers(params = {}) {
   return api.get("/admin/users", { params });
+}
+
+export async function createAdminUser(userData) {
+  return api.post("/admin/users", userData);
 }
 
 export async function updateUserRole(userId, role) {
@@ -98,8 +102,17 @@ export async function deleteAdminUser(userId) {
   return api.delete(`/admin/users/${userId}`);
 }
 
+export async function changeAdminPassword(oldPassword, newPassword) {
+  return api.post("/auth/changepassword", { oldPassword, newPassword });
+}
+
+export async function resetUserPasswordByAdmin(userId, newPassword) {
+  return api.post(`/admin/users/${userId}/change-password`, { userId, newPassword });
+}
+
 // ── Sellers Management (derived / filterable) ─────────────────
 export async function getAdminSellers() {
   // Sellers are products with seller info or user sellers
   return api.get("/admin/products", { params: { isSeller: true } });
 }
+

@@ -8,22 +8,23 @@ export const metadata = {
 
 export default function AdminLoginPage() {
   return (
-    <main className="relative flex min-h-screen flex-col justify-center overflow-hidden bg-slate-900 py-12 px-4 sm:px-6 lg:px-8">
+    <main className="relative flex h-screen w-full items-center justify-center overflow-hidden bg-slate-900 p-4">
       {/* Dynamic Ambient Background Gradients */}
-      <div className="absolute -top-40 -left-40 h-96 w-96 rounded-full bg-emerald-500/20 blur-3xl" />
-      <div className="absolute -bottom-40 -right-40 h-96 w-96 rounded-full bg-teal-500/20 blur-3xl" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[500px] w-[500px] rounded-full bg-emerald-600/10 blur-[120px]" />
+      <div className="absolute -top-40 -left-40 h-96 w-96 rounded-full bg-emerald-500/20 blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-40 -right-40 h-96 w-96 rounded-full bg-teal-500/20 blur-3xl pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[500px] w-[500px] rounded-full bg-emerald-600/10 blur-[120px] pointer-events-none" />
 
-      <div className="relative mx-auto w-full max-w-md">
-        <div className="rounded-3xl border border-white/10 bg-white/95 backdrop-blur-xl p-8 sm:p-10 shadow-2xl shadow-emerald-950/50">
+      <div className="relative z-10 w-full max-w-md my-auto">
+        <div className="rounded-3xl border border-white/10 bg-white/95 backdrop-blur-xl p-6 sm:p-8 shadow-2xl shadow-emerald-950/50">
           <AdminLoginForm />
         </div>
         
         {/* Footer Credit / Copyright */}
-        <p className="mt-8 text-center text-xs font-medium text-slate-400">
+        <p className="mt-4 text-center text-xs font-medium text-slate-400">
           &copy; {new Date().getFullYear()} Kundu Agro & Fisheries. All rights reserved.
         </p>
       </div>
     </main>
   );
 }
+

@@ -29,8 +29,30 @@ export default function AdminUsersPage() {
   };
 
   useEffect(() => {
-    loadUsers();
+    let isMounted = true;
+    getAdminUsers()
+      .then((res) => {
+        if (!isMounted) return;
+        if (res && res.users && Array.isArray(res.users)) {
+          setUsers(res.users);
+        } else if (res && res.data && Array.isArray(res.data)) {
+          setUsers(res.data);
+        } else if (Array.isArray(res)) {
+          setUsers(res);
+        } else {
+          setUsers([]);
+        }
+      })
+      .catch((err) => console.error("Failed to load admin users:", err))
+      .finally(() => {
+        if (isMounted) setIsLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
+
 
   const handleRoleChange = async (userId, newRole) => {
     await updateUserRole(userId, newRole);
@@ -53,5 +75,6 @@ export default function AdminUsersPage() {
     );
   }
 
-  return <UsersList users={users} onRoleChange={handleRoleChange} />;
+  return <UsersList users={users} onRoleChange={handleRoleChange} onRefresh={loadUsers} />;
 }
+
