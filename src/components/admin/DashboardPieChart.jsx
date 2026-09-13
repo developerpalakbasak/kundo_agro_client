@@ -17,7 +17,7 @@ const COLOR_PALETTES = {
   ],
   roles: {
     Admin: "#EF4444",    // Red
-    Manager: "#F59E0B",  // Amber
+    Seller: "#3B82F6",   // Blue
     Staff: "#3B82F6",    // Blue
     Customer: "#10B981", // Emerald
   },
@@ -54,14 +54,13 @@ export function DashboardPieChart({ stats, breakdown }) {
 
     const roleCounts = breakdown?.roles || {
       Admin: 0,
-      Manager: 0,
+      Seller: 0,
       Staff: 0,
       Customer: 0,
     };
     return [
       { label: "Customer", value: roleCounts.Customer || 0, color: COLOR_PALETTES.roles.Customer },
-      { label: "Staff", value: roleCounts.Staff || 0, color: COLOR_PALETTES.roles.Staff },
-      { label: "Manager", value: roleCounts.Manager || 0, color: COLOR_PALETTES.roles.Manager },
+      { label: "Seller", value: (roleCounts.Seller ?? roleCounts.Staff) || 0, color: COLOR_PALETTES.roles.Seller },
       { label: "Admin", value: roleCounts.Admin || 0, color: COLOR_PALETTES.roles.Admin },
     ];
   };

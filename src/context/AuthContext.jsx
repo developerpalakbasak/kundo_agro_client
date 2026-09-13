@@ -45,7 +45,7 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const isAdmin = user?.role === "Admin" || user?.role === "Manager";
+  const isAdmin = user?.role === "Admin";
 
   return (
     <AuthContext.Provider

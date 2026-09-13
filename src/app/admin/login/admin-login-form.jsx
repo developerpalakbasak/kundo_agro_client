@@ -28,7 +28,7 @@ export function AdminLoginForm() {
       const res = await login({ email: email.trim(), password });
 
       const userRole = res?.user?.role;
-      if (userRole && ["Admin", "Manager", "Staff"].includes(userRole)) {
+      if (userRole && ["Admin", "Seller", "Staff"].includes(userRole)) {
         router.push("/admin");
       } else {
         setError("Access denied. Admin permissions required.");

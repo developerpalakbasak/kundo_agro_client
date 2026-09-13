@@ -25,8 +25,7 @@ function getRoleBadgeColor(role) {
   switch (role) {
     case "Admin":
       return "bg-purple-50 text-purple-700 border-purple-200";
-    case "Manager":
-      return "bg-blue-50 text-blue-700 border-blue-200";
+    case "Seller":
     case "Staff":
       return "bg-amber-50 text-amber-700 border-amber-200";
     case "Customer":
@@ -119,8 +118,7 @@ export function UsersList({ users = [], onRoleChange, onDeleteUser }) {
                           )}`}
                         >
                           <option value="Customer">Customer</option>
-                          <option value="Staff">Staff</option>
-                          <option value="Manager">Manager</option>
+                          <option value="Seller">Seller</option>
                           <option value="Admin">Admin</option>
                         </select>
                       </td>
