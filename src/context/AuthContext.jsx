@@ -26,7 +26,7 @@ export function AuthProvider({ children }) {
   };
 
   useEffect(() => {
-    fetchUser();
+    (async () => await fetchUser())();
   }, []);
 
   const login = async (credentials) => {
