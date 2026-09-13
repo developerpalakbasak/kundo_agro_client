@@ -108,55 +108,58 @@ export function CustomerHeader() {
               );
             })}
 
-            {/* Portals Dropdown */}
-            <div className="relative" ref={portalsRef}>
-              <button
-                type="button"
-                onClick={() => setPortalsDropdownOpen(!portalsDropdownOpen)}
-                className={`flex items-center gap-1.5 text-sm font-semibold transition-colors cursor-pointer py-1.5 px-2.5 rounded-xl hover:bg-gray-50 ${pathname.startsWith("/seller") || pathname.startsWith("/admin")
-                  ? "text-primary bg-primary/5"
-                  : "text-gray-600 hover:text-primary"
-                  }`}
-              >
-                <span>{language === "bn" ? "পোর্টালসমূহ" : "Portals"}</span>
-                <svg
-                  className={`w-4 h-4 transition-transform duration-200 ${portalsDropdownOpen ? "rotate-180" : ""
+            {/* Portals Dropdown (Only when no user is logged in) */}
+            {!user && (
+              <div className="relative" ref={portalsRef}>
+                <button
+                  type="button"
+                  onClick={() => setPortalsDropdownOpen(!portalsDropdownOpen)}
+                  className={`flex items-center gap-1.5 text-sm font-semibold transition-colors cursor-pointer py-1.5 px-2.5 rounded-xl hover:bg-gray-50 ${pathname.startsWith("/seller") || pathname.startsWith("/admin")
+                    ? "text-primary bg-primary/5"
+                    : "text-gray-600 hover:text-primary"
                     }`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
+                  <span>{language === "bn" ? "পোর্টালসমূহ" : "Portals"}</span>
+                  <svg
+                    className={`w-4 h-4 transition-transform duration-200 ${portalsDropdownOpen ? "rotate-180" : ""
+                      }`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
 
-              {portalsDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-56 rounded-2xl border border-gray-100 bg-white p-2 shadow-xl animate-scale-in z-50 space-y-1">
-                  <Link
-                    href="/seller"
-                    onClick={() => setPortalsDropdownOpen(false)}
-                    className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-bold text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors"
-                  >
-                    <span className="text-base">🐟</span>
-                    <div>
-                      <div>{language === "bn" ? "পোনা বিক্রেতা পোর্টাল" : "Fish Seed Seller Portal"}</div>
-                      <div className="text-[10px] font-normal text-gray-400">Hatchery & Fry Management</div>
-                    </div>
-                  </Link>
-                  <Link
-                    href="/admin/login"
-                    onClick={() => setPortalsDropdownOpen(false)}
-                    className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-bold text-gray-700 hover:bg-primary/10 hover:text-primary transition-colors"
-                  >
-                    <span className="text-base">⚙️</span>
-                    <div>
-                      <div>{language === "bn" ? "এডমিন প্যানেল" : "Admin Panel"}</div>
-                      <div className="text-[10px] font-normal text-gray-400">Store Management & Settings</div>
-                    </div>
-                  </Link>
-                </div>
-              )}
-            </div>
+                {portalsDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-56 rounded-2xl border border-gray-100 bg-white p-2 shadow-xl animate-scale-in z-50 space-y-1">
+                    <Link
+                      href="/seller"
+                      onClick={() => setPortalsDropdownOpen(false)}
+                      className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-bold text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors"
+                    >
+                      <span className="text-base">🐟</span>
+                      <div>
+                        <div>{language === "bn" ? "পোনা বিক্রেতা পোর্টাল" : "Fish Seed Seller Portal"}</div>
+                        <div className="text-[10px] font-normal text-gray-400">Hatchery & Fry Management</div>
+                      </div>
+                    </Link>
+                    <Link
+                      href="/admin/login"
+                      onClick={() => setPortalsDropdownOpen(false)}
+                      className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-bold text-gray-700 hover:bg-primary/10 hover:text-primary transition-colors"
+                    >
+                      <span className="text-base">⚙️</span>
+                      <div>
+                        <div>{language === "bn" ? "এডমিন প্যানেল" : "Admin Panel"}</div>
+                        <div className="text-[10px] font-normal text-gray-400">Store Management & Settings</div>
+                      </div>
+                    </Link>
+                  </div>
+                )}
+              </div>
+            )}
+
           </nav>
 
           {/* Right Header Actions */}
@@ -335,26 +338,29 @@ export function CustomerHeader() {
                 })}
               </div>
 
-              {/* Mobile Portals Section */}
-              <div className="pt-2 border-t border-gray-100 space-y-1">
-                <p className="px-3.5 text-[10px] font-bold uppercase tracking-wider text-gray-400">
-                  {language === "bn" ? "পোর্টালসমূহ" : "Portals"}
-                </p>
-                <Link
-                  href="/seller"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-50 transition-colors"
-                >
-                  🐟 {language === "bn" ? "পোনা বিক্রেতা পোর্টাল" : "Fish Seed Seller Portal"}
-                </Link>
-                <Link
-                  href="/admin/login"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 transition-colors"
-                >
-                  ⚙️ {language === "bn" ? "এডমিন প্যানেল" : "Admin Panel"}
-                </Link>
-              </div>
+              {/* Mobile Portals Section (Only when no user is logged in) */}
+              {!user && (
+                <div className="pt-2 border-t border-gray-100 space-y-1">
+                  <p className="px-3.5 text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                    {language === "bn" ? "পোর্টালসমূহ" : "Portals"}
+                  </p>
+                  <Link
+                    href="/seller"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-50 transition-colors"
+                  >
+                    🐟 {language === "bn" ? "পোনা বিক্রেতা পোর্টাল" : "Fish Seed Seller Portal"}
+                  </Link>
+                  <Link
+                    href="/admin/login"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    ⚙️ {language === "bn" ? "এডমিন প্যানেল" : "Admin Panel"}
+                  </Link>
+                </div>
+              )}
+
             </div>
           </>
         )}

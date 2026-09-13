@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useLanguage } from "@/hooks/languageContext";
 import { useAuth } from "@/context/AuthContext";
+import { ChangePasswordModal } from "./ChangePasswordModal";
 
 const navLinks = [
   { href: "/admin", key: "dashboard", label: "Dashboard" },
@@ -19,14 +20,16 @@ const navLinks = [
 
 export function AdminMobileNav() {
   const [isOpen, setIsOpen] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const { t } = useLanguage();
   const { logout } = useAuth();
 
   useEffect(() => {
-    setIsOpen(false);
+    if (isOpen) setIsOpen(false);
   }, [pathname]);
+
 
   useEffect(() => {
     if (isOpen) {
@@ -75,7 +78,7 @@ export function AdminMobileNav() {
 
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm md:hidden"
+          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-xs md:hidden"
           onClick={() => setIsOpen(false)}
         />
       )}
@@ -120,7 +123,18 @@ export function AdminMobileNav() {
           })}
         </nav>
 
-        <div className="border-t border-gray-100 px-3 py-4">
+        <div className="space-y-2 border-t border-gray-100 px-3 py-4">
+          <button
+            type="button"
+            onClick={() => {
+              setIsOpen(false);
+              setShowPasswordModal(true);
+            }}
+            className="w-full cursor-pointer rounded-xl border border-gray-200 px-4 py-3 text-left text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+          >
+            🔑 Change Password
+          </button>
+
           <button
             type="button"
             onClick={handleLogout}
@@ -130,6 +144,11 @@ export function AdminMobileNav() {
           </button>
         </div>
       </div>
+
+      <ChangePasswordModal
+        isOpen={showPasswordModal}
+        onClose={() => setShowPasswordModal(false)}
+      />
     </>
   );
 }

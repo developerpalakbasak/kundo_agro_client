@@ -43,32 +43,33 @@ export function AdminLoginForm() {
   return (
     <div className="w-full max-w-md mx-auto">
       {/* Brand Header */}
-      <div className="flex flex-col items-center text-center gap-3 mb-8">
-        <div className="relative p-2 rounded-2xl bg-emerald-50/80 ring-1 ring-emerald-500/20 shadow-sm transition-transform hover:scale-105">
+      <div className="flex flex-col items-center text-center gap-2 mb-5">
+        <div className="relative p-1.5 rounded-2xl bg-emerald-50/80 ring-1 ring-emerald-500/20 shadow-sm transition-transform hover:scale-105">
           <Image
             src="/kundu_logo.png"
             alt="Kundu Agro & Fisheries"
-            width={72}
-            height={72}
+            width={56}
+            height={56}
             priority
             className="rounded-xl object-contain"
           />
         </div>
         <div>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100/70 text-emerald-800 tracking-wide uppercase mb-2">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100/70 text-emerald-800 tracking-wide uppercase mb-1">
             Portal Access
           </span>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
+          <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900">
             Admin Panel
           </h1>
-          <p className="mt-1 text-sm text-slate-500 font-medium">
+          <p className="mt-0.5 text-xs sm:text-sm text-slate-500 font-medium">
             Sign in to manage Kundu Agro & Fisheries
           </p>
         </div>
       </div>
 
       {/* Form Container */}
-      <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+
         {error && (
           <div
             role="alert"
