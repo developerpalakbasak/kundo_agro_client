@@ -83,15 +83,17 @@ export default function BlogsPage() {
                 </div>
             ) : (
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                    {blogs.map((blog) => (
-                        <Link href={`/blogs/${blog.slug}`} key={blog.id}>
+                    {blogs.map((blog) => {
+                        console.log(blog)
+                        return <Link href={`/blogs/${blog.slug}`} key={blog.id}>
                             <div className="group cursor-pointer flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all hover:shadow-md">
                                 <div className="relative h-48 w-full overflow-hidden bg-gray-50">
                                     {blog.thumbnail ? (
                                         <Image
-                                            src={blog.thumbnail}
+                                            src={`${process.env.NEXT_PUBLIC_IMAGE_URL}${blog.thumbnail}`}
                                             alt={blog.title}
                                             fill
+                                            unoptimized
                                             className="object-cover transition-transform duration-300 group-hover:scale-105"
                                         />
                                     ) : (
@@ -122,11 +124,11 @@ export default function BlogsPage() {
                                 </div>
                             </div>
                         </Link>
-                    ))}
+                    })}
                 </div>
             )}
 
-       
+
         </div>
     );
 }

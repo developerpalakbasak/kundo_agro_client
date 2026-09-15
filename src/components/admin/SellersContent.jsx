@@ -196,7 +196,8 @@ export function SellersContent({ sellers = [], onToggleStatus, onDeleteSeller })
                           type="button"
                           disabled={isUpdating === id}
                           onClick={() => handleDelete(id)}
-                          className="cursor-pointer text-xs font-semibold text-red-600 hover:underline disabled:opacity-50"
+                          className="cursor-pointer text-xs font-semibold text-red-600 
+                          hover:underline disabled:opacity-50"
                         >
                           Delete
                         </button>

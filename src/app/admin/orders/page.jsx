@@ -29,7 +29,7 @@ export default function AdminOrdersPage() {
   };
 
   useEffect(() => {
-    loadOrders();
+    (async () => { loadOrders(); })();
   }, []);
 
   const handleUpdateStatus = async (orderId, newStatus) => {

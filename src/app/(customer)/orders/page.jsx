@@ -107,6 +107,28 @@ export default function OrdersPage() {
     }
   };
 
+  const getPaymentStatusBadgeClass = (status) => {
+    switch (status) {
+      case "paid":
+        return "bg-emerald-50 text-emerald-700 border-emerald-200";
+      case "failed":
+        return "bg-red-50 text-red-700 border-red-200";
+      default:
+        return "bg-yellow-50 text-yellow-700 border-yellow-200";
+    }
+  };
+
+  const getPaymentStatusLabel = (status) => {
+    switch (status) {
+      case "paid":
+        return language === "bn" ? "পেমেন্ট সম্পন্ন" : "Paid";
+      case "failed":
+        return language === "bn" ? "পেমেন্ট ব্যর্থ" : "Payment Failed";
+      default:
+        return language === "bn" ? "পেমেন্ট বাকি" : "Pending";
+    }
+  };
+
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Header & Order Tracking Bar */}
@@ -233,13 +255,22 @@ export default function OrdersPage() {
                   <span className="text-xs text-gray-400">•</span>
                   <span className="text-xs text-gray-500">{order.date || new Date(order.createdAt).toLocaleDateString()}</span>
                 </div>
-                <span
-                  className={`inline-flex items-center rounded-full border px-3 py-1 text-[11px] font-bold ${getStatusBadgeClass(
-                    order.status
-                  )}`}
-                >
-                  {getStatusLabel(order.status)}
-                </span>
+                <div className="flex gap-2">
+                  <span
+                    className={`inline-flex items-center rounded-full border px-3 py-1 text-[11px] font-bold ${getPaymentStatusBadgeClass(
+                      order.paymentStatus
+                    )}`}
+                  >
+                    {getPaymentStatusLabel(order.paymentStatus)}
+                  </span>
+                  <span
+                    className={`inline-flex items-center rounded-full border px-3 py-1 text-[11px] font-bold ${getStatusBadgeClass(
+                      order.status
+                    )}`}
+                  >
+                    {getStatusLabel(order.status)}
+                  </span>
+                </div>
               </div>
 
               {/* Items summary */}

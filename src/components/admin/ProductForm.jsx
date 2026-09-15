@@ -288,7 +288,7 @@ export function ProductForm({ initialData = null, onSubmit, isEditing = false })
         {thumbnailPreview && (
           <div className="relative h-44 w-full overflow-hidden rounded-xl border border-gray-200 bg-gray-50">
             <Image
-              src={thumbnailPreview}
+              src={`${process.env.NEXT_PUBLIC_IMAGE_URL}${thumbnailPreview}`}
               alt="Thumbnail Preview"
               fill
               unoptimized

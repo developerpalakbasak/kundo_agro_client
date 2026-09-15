@@ -74,11 +74,10 @@ export function OrdersList({ initialOrders = [], onUpdateStatus }) {
                 key={statusKey}
                 type="button"
                 onClick={() => setFilter(statusKey)}
-                className={`rounded-lg px-3 py-1.5 text-xs font-semibold capitalize transition-all cursor-pointer ${
-                  filter === statusKey
+                className={`rounded-lg px-3 py-1.5 text-xs font-semibold capitalize transition-all cursor-pointer ${filter === statusKey
                     ? "bg-white text-gray-900 shadow-xs"
                     : "text-gray-600 hover:text-gray-900"
-                }`}
+                  }`}
               >
                 {statusKey}
               </button>
@@ -174,7 +173,7 @@ export function OrdersList({ initialOrders = [], onUpdateStatus }) {
             <div className="flex items-center justify-between border-b border-gray-100 pb-3">
               <div>
                 <h3 className="text-base font-bold text-gray-900">
-                  Order Details #{ (selectedOrder._id || selectedOrder.id).slice(-6) }
+                  Order Details #{(selectedOrder._id || selectedOrder.id).slice(-6)}
                 </h3>
                 <p className="text-xs text-gray-500">
                   {selectedOrder.createdAt ? new Date(selectedOrder.createdAt).toLocaleString() : ""}

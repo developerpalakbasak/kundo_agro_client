@@ -85,8 +85,8 @@ export default function CheckoutPage() {
         const createdOrderId = createdOrder?.orderId || "";
         clearCart();
 
-        // Check if digital payment (bKash / Nagad) selected
-        if (formData.paymentMethod === "bKash" || formData.paymentMethod === "Nagad") {
+        // Check if online payment selected
+        if (formData.paymentMethod === "online-payment") {
           try {
             const payRes = await initSSLCommerzPayment(createdOrderId);
             const redirectUrl = payRes?.gatewayUrl || payRes?.data?.gatewayUrl;
@@ -257,8 +257,9 @@ export default function CheckoutPage() {
                       <option value="Cash on Delivery">
                         {language === "bn" ? "ক্যাশ অন ডেলিভারি (COD)" : "Cash on Delivery (COD)"}
                       </option>
-                      <option value="bKash">bKash (Mobile Banking)</option>
-                      <option value="Nagad">Nagad (Mobile Banking)</option>
+                      <option value="online-payment">
+                        {language === "bn" ? "অনলাইন পেমেন্ট" : "Online Payment"}
+                      </option>
                     </select>
                   </div>
                 </div>

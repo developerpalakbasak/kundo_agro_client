@@ -100,7 +100,7 @@ export function BlogsList({ blogs = [], onDeleteBlog }) {
                   <div className="flex items-center gap-2">
                     <Link
                       href={`/admin/blogs/${blogId}`}
-                      className="text-xs font-semibold text-emerald-600 hover:underline"
+                      className="cursor-pointer text-xs font-semibold text-emerald-600 hover:underline"
                     >
                       View / Edit
                     </Link>
@@ -108,7 +108,7 @@ export function BlogsList({ blogs = [], onDeleteBlog }) {
                       type="button"
                       onClick={(e) => handleDelete(blogId, blog.title, e)}
                       disabled={deletingId === blogId}
-                      className="text-xs font-semibold text-red-600 hover:underline disabled:opacity-50"
+                      className="cursor-pointer text-xs font-semibold text-red-600 hover:underline disabled:opacity-50"
                     >
                       {deletingId === blogId ? "Deleting..." : "Delete"}
                     </button>
