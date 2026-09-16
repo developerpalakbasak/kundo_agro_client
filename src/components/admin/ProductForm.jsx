@@ -338,7 +338,7 @@ export function ProductForm({ initialData = null, onSubmit, isEditing = false })
               src={
                 thumbnailPreview.startsWith("blob:") || thumbnailPreview.startsWith("http")
                   ? thumbnailPreview
-                  : `${process.env.NEXT_PUBLIC_IMAGE_URL || "http://localhost:4000"}${thumbnailPreview.startsWith("/") ? "" : "/"}${thumbnailPreview}`
+                  : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}${thumbnailPreview.startsWith("/") ? "" : "/"}${thumbnailPreview}`
               }
               alt="Thumbnail Preview"
               fill

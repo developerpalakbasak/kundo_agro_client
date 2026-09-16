@@ -94,7 +94,7 @@ export default function BlogDetailPage() {
       <div className="relative w-full h-[420px] md:h-[520px] overflow-hidden bg-gray-900">
         {blog.thumbnail ? (
           <Image
-            src={blog.thumbnail.startsWith("http") ? blog.thumbnail : `${process.env.NEXT_PUBLIC_IMAGE_URL}${blog.thumbnail}`}
+            src={blog.thumbnail.startsWith("http") ? blog.thumbnail : `${process.env.NEXT_PUBLIC_API_URL}${blog.thumbnail}`}
             alt={blog.title}
             fill
             priority

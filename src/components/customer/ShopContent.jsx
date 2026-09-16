@@ -370,7 +370,7 @@ export function ShopContent({ initialCategory = "all" }) {
                                 <div>
                                     <div className="relative h-48 w-full overflow-hidden rounded-xl bg-gray-100 mb-3">
                                         <Image
-                                            src={`${process.env.NEXT_PUBLIC_IMAGE_URL}${product.thumbnail}`}
+                                            src={`${process.env.NEXT_PUBLIC_API_URL}${product.thumbnail}`}
                                             alt={product.name}
                                             fill
                                             unoptimized

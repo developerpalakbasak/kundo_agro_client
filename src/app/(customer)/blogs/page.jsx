@@ -90,7 +90,7 @@ export default function BlogsPage() {
                                 <div className="relative h-48 w-full overflow-hidden bg-gray-50">
                                     {blog.thumbnail ? (
                                         <Image
-                                            src={`${process.env.NEXT_PUBLIC_IMAGE_URL}${blog.thumbnail}`}
+                                            src={`${process.env.NEXT_PUBLIC_API_URL}${blog.thumbnail}`}
                                             alt={blog.title}
                                             fill
                                             unoptimized

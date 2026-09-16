@@ -171,7 +171,7 @@ export function BlogForm({ initialData = null, onSubmit, isEditing = false }) {
         {thumbnailPreview && (
           <div className="w-full overflow-hidden rounded-xl border border-gray-200 bg-gray-50">
             <img
-              src={`${process.env.NEXT_PUBLIC_IMAGE_URL}${thumbnailPreview}`}
+              src={`${process.env.NEXT_PUBLIC_API_URL}${thumbnailPreview}`}
               alt="Thumbnail Preview"
               className="w-full h-auto object-cover"
             />
