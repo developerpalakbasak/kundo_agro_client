@@ -16,6 +16,10 @@ export async function logoutUser() {
   return api.post("/auth/logout");
 }
 
+export async function registerSeller(sellerData) {
+  return api.post("/auth/seller/register", sellerData);
+}
+
 export async function getCurrentUser() {
   return api.get("/auth/me");
 }

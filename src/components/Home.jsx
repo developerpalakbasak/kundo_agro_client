@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useLanguage } from "../hooks/languageContext";
+import { useCart } from "../context/cartContext";
 
 function getCategoryIcon(categoryName) {
     const lower = categoryName.toLowerCase();
@@ -22,6 +23,7 @@ export default function Home({
     latestBlogs,
 }) {
     const { t, language } = useLanguage();
+    const { addToCart } = useCart();
 
     // Demo categories for UI preview
     const demoCategories = ["Seeds", "Fish", "Dairy", "Food", "Feed", "Import"];
@@ -153,7 +155,7 @@ export default function Home({
                                     </div>
                                     <button
                                         type="button"
-                                        // onClick={() => addToCart(product)}
+                                        onClick={() => addToCart(product)}
                                         className="cursor-pointer rounded-xl bg-primary/10 px-3.5 py-2 text-xs font-bold text-primary hover:bg-primary hover:text-white transition-colors"
                                     >
                                         {t("addToCart")}
