@@ -370,9 +370,10 @@ export function ShopContent({ initialCategory = "all" }) {
                                 <div>
                                     <div className="relative h-48 w-full overflow-hidden rounded-xl bg-gray-100 mb-3">
                                         <Image
-                                            src={product.thumbnail || "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=400&q=80"}
+                                            src={`${process.env.NEXT_PUBLIC_IMAGE_URL}${product.thumbnail}`}
                                             alt={product.name}
                                             fill
+                                            unoptimized
                                             className="object-cover transition-transform duration-300 group-hover:scale-105"
                                         />
                                         {isFishSeed && (
@@ -457,7 +458,7 @@ export function ShopContent({ initialCategory = "all" }) {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
                             <div className="relative h-56 sm:h-64 w-full overflow-hidden rounded-2xl bg-gray-100 shadow-sm border border-gray-100">
                                 <Image
-                                    src={selectedProduct.thumbnail || "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=400&q=80"}
+                                    src={selectedProduct.thumbnail}
                                     alt={selectedProduct.name}
                                     fill
                                     className="object-cover"

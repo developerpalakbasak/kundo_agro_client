@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getAdminSellers } from "@/lib/api/admin";
+import { getAdminSellers, toggleSellerStatus } from "@/lib/api/admin";
 import { SellersContent } from "@/components/admin/SellersContent";
 
 export default function AdminSellersPage() {
@@ -13,28 +13,7 @@ export default function AdminSellersPage() {
       setIsLoading(true);
       const res = await getAdminSellers();
       if (res && res.data && Array.isArray(res.data)) {
-        // Derive unique sellers from products with seller info
-        const sellerList = [];
-        const seen = new Set();
-
-        res.data.forEach((p) => {
-          if (p.sellerName || p.sellerDistrict) {
-            const key = `${p.sellerName || ""}-${p.sellerDistrict || ""}`;
-            if (!seen.has(key)) {
-              seen.add(key);
-              sellerList.push({
-                id: p._id || p.id,
-                hatcheryName: p.sellerName || "Agro / Fish Hatchery",
-                name: p.sellerName || "Registered Seller",
-                phone: p.sellerPhone || "N/A",
-                district: p.sellerDistrict || "Bangladesh",
-                status: "Verified",
-              });
-            }
-          }
-        });
-
-        setSellers(sellerList);
+        setSellers(res.data);
       } else {
         setSellers([]);
       }
@@ -46,8 +25,14 @@ export default function AdminSellersPage() {
   };
 
   useEffect(() => {
-    loadSellers();
+    (async()=>{loadSellers()})();
   }, []);
+  const handleToggleStatus = async (id, nextStatus) => {
+    await toggleSellerStatus(id, nextStatus);
+    setSellers((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, status: nextStatus, isVerifiedSeller: nextStatus === "Verified" } : s))
+    );
+  };
 
   const handleDeleteSeller = async (id) => {
     setSellers((prev) => prev.filter((s) => s.id !== id));
@@ -64,5 +49,5 @@ export default function AdminSellersPage() {
     );
   }
 
-  return <SellersContent sellers={sellers} onDeleteSeller={handleDeleteSeller} />;
+  return <SellersContent sellers={sellers} onToggleStatus={handleToggleStatus} onDeleteSeller={handleDeleteSeller} />;
 }

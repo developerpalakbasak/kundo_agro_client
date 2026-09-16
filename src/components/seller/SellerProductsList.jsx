@@ -84,9 +84,8 @@ export function SellerProductsList({ products = [], onDeleteProduct }) {
               ? language === "bn"
                 ? "কোন পণ্য নেই"
                 : "No products in your catalog."
-              : `${products.length} ${
-                  language === "bn" ? "টি পণ্য পাওয়া গেছে" : "products total"
-                }`}
+              : `${products.length} ${language === "bn" ? "টি পণ্য পাওয়া গেছে" : "products total"
+              }`}
           </p>
         </div>
 
@@ -173,8 +172,8 @@ export function SellerProductsList({ products = [], onDeleteProduct }) {
                 ? "আপনার সার্চ ফিল্টার পরিবর্তন করে আবার চেষ্টা করুন।"
                 : "Try adjusting your search criteria or filters."
               : language === "bn"
-              ? "আপনার হ্যাচারি বা ফার্মের পোনা এবং এগ্রো পণ্য বিক্রির জন্য যোগ করুন।"
-              : "Get started by adding your first product listing to start receiving orders."}
+                ? "আপনার হ্যাচারি বা ফার্মের পোনা এবং এগ্রো পণ্য বিক্রির জন্য যোগ করুন।"
+                : "Get started by adding your first product listing to start receiving orders."}
           </p>
           <Link
             href="/seller/products/new"
@@ -213,19 +212,18 @@ export function SellerProductsList({ products = [], onDeleteProduct }) {
                         {product.category}
                       </span>
                       <span
-                        className={`rounded-md px-2 py-0.5 text-[10px] font-bold ${
-                          product.isAvailable
+                        className={`rounded-md px-2 py-0.5 text-[10px] font-bold ${product.isAvailable
                             ? "bg-green-100 text-green-800"
                             : "bg-red-100 text-red-800"
-                        }`}
+                          }`}
                       >
                         {product.isAvailable
                           ? language === "bn"
                             ? "স্টকে আছে"
                             : "In Stock"
                           : language === "bn"
-                          ? "স্টক শেষ"
-                          : "Out of Stock"}
+                            ? "স্টক শেষ"
+                            : "Out of Stock"}
                       </span>
                     </div>
 
@@ -334,11 +332,10 @@ export function SellerProductsList({ products = [], onDeleteProduct }) {
               <div className="rounded-xl bg-gray-50 p-3">
                 <span className="font-medium text-gray-400 block">Status</span>
                 <span
-                  className={`text-sm font-bold ${
-                    selectedProduct.isAvailable
+                  className={`text-sm font-bold ${selectedProduct.isAvailable
                       ? "text-emerald-600"
                       : "text-red-500"
-                  }`}
+                    }`}
                 >
                   {selectedProduct.isAvailable ? "In Stock" : "Out of Stock"}
                 </span>

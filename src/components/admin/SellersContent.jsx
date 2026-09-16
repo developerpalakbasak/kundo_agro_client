@@ -12,9 +12,9 @@ export function SellersContent({ sellers = [], onToggleStatus, onDeleteSeller })
   const [isUpdating, setIsUpdating] = useState(null);
 
   const filteredSellers = sellers.filter((seller) => {
-    const name = seller.name || seller.hatcheryName || seller.sellerName || "";
-    const district = seller.district || seller.sellerDistrict || "";
-    const phone = seller.phone || seller.sellerPhone || "";
+    const name = seller.sellerName || "";
+    const district = seller.sellerDistrict || "";
+    const phone = seller.sellerPhone || "";
 
     const matchesSearch =
       name.toLowerCase().includes(search.toLowerCase()) ||
@@ -22,7 +22,7 @@ export function SellersContent({ sellers = [], onToggleStatus, onDeleteSeller })
       phone.toLowerCase().includes(search.toLowerCase());
 
     const matchesStatus =
-      statusFilter === "All" || (seller.status || "Verified") === statusFilter;
+      statusFilter === "All" || (seller.isVerifiedSeller ? "Verified" : "Pending") === statusFilter;
 
     return matchesSearch && matchesStatus;
   });
@@ -33,7 +33,7 @@ export function SellersContent({ sellers = [], onToggleStatus, onDeleteSeller })
       setIsUpdating(id);
       if (onToggleStatus) await onToggleStatus(id, nextStatus);
       if (selectedSeller && (selectedSeller._id || selectedSeller.id) === id) {
-        setSelectedSeller((prev) => (prev ? { ...prev, status: nextStatus } : null));
+        setSelectedSeller((prev) => (prev ? { ...prev, isVerifiedSeller: nextStatus === "Verified" } : null));
       }
     } catch (err) {
       alert(err.message || "Failed to update seller status.");
@@ -98,7 +98,7 @@ export function SellersContent({ sellers = [], onToggleStatus, onDeleteSeller })
         </div>
 
         <div className="flex items-center gap-2">
-          {["All", "Verified", "Pending", "Inactive"].map((status) => (
+          {["All", "Verified", "Pending"].map((status) => (
             <button
               key={status}
               type="button"
@@ -142,11 +142,11 @@ export function SellersContent({ sellers = [], onToggleStatus, onDeleteSeller })
               <tbody className="divide-y divide-gray-100 font-medium">
                 {filteredSellers.map((seller) => {
                   const id = seller._id || seller.id;
-                  const name = seller.hatcheryName || seller.name || seller.sellerName || "Unnamed Seller";
-                  const contactName = seller.name || seller.sellerName || "Contact";
-                  const district = seller.district || seller.sellerDistrict || "—";
-                  const phone = seller.phone || seller.sellerPhone || "—";
-                  const status = seller.status || "Verified";
+                  const name = seller.sellerName || "Unnamed Seller";
+                  const contactName = seller.sellerName || "Contact";
+                  const district = seller.sellerDistrict || "—";
+                  const phone = seller.sellerPhone || "—";
+                  const status = seller.isVerifiedSeller ? "Verified" : "Pending";
 
                   return (
                     <tr key={id} className="hover:bg-gray-50/80 transition-colors">
@@ -162,27 +162,22 @@ export function SellersContent({ sellers = [], onToggleStatus, onDeleteSeller })
                       </td>
                       <td className="px-6 py-4 font-semibold text-gray-700">📍 {district}</td>
                       <td className="px-6 py-4 text-gray-600">📞 {phone}</td>
-                      <td className="px-6 py-4">
-                        <span
-                          className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold ${
+                      <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
+                        <select
+                          value={status}
+                          disabled={isUpdating === id || !seller.isUser}
+                          onChange={(e) => handleStatusChange(seller, e.target.value)}
+                          className={`rounded-lg border px-2.5 py-1 text-xs font-semibold cursor-pointer outline-none disabled:cursor-not-allowed disabled:opacity-70 ${
                             status === "Verified"
-                              ? "bg-emerald-100 text-emerald-800"
+                              ? "bg-emerald-100 text-emerald-800 border-emerald-200"
                               : status === "Pending"
-                              ? "bg-amber-100 text-amber-800"
-                              : "bg-gray-100 text-gray-600"
+                              ? "bg-amber-100 text-amber-800 border-amber-200"
+                              : "bg-gray-100 text-gray-600 border-gray-200"
                           }`}
                         >
-                          <span
-                            className={`h-1.5 w-1.5 rounded-full ${
-                              status === "Verified"
-                                ? "bg-emerald-600"
-                                : status === "Pending"
-                                ? "bg-amber-600"
-                                : "bg-gray-400"
-                            }`}
-                          />
-                          {status}
-                        </span>
+                          <option value="Verified">Verified</option>
+                          <option value="Pending">Pending</option>
+                        </select>
                       </td>
                       <td className="px-6 py-4 text-right space-x-2">
                         <button

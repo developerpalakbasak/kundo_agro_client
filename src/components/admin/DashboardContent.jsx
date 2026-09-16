@@ -17,7 +17,7 @@ export function DashboardContent({
   const stats = [
     { key: "products", label: "Products", value: String(productCount), href: "/admin/products" },
     { key: "users", label: "Users", value: String(userCount), href: "/admin/users" },
-    { key: "blogsTitle", label: "Blogs", value: String(blogCount), href: "/admin/blogs" },
+    { key: "blogs", label: "Blogs", value: String(blogCount), href: "/admin/blogs" },
     { key: "orders", label: "Orders", value: String(orderCount), href: "/admin/orders" },
   ];
 
@@ -55,7 +55,7 @@ export function DashboardContent({
           </Link>
         ))}
       </div>
-      
+
       {/* Revenue Card */}
       {totalRevenue > 0 && (
         <div className="rounded-xl border border-gray-100 bg-gradient-to-r from-emerald-500 to-teal-600 p-6 text-white shadow-xs">

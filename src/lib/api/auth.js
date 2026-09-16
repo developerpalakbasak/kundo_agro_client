@@ -9,7 +9,7 @@ export async function loginUser({ email, identifier, password }) {
 }
 
 export async function registerUser({ name, email, password, phone, role }) {
-  return api.post("/auth/register", { name, email, password, phone, role });
+  return api.post("/auth/user/register", { name, email, password, phone, role });
 }
 
 export async function logoutUser() {

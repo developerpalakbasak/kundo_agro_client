@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { getAdminCategories } from "@/lib/api/admin";
+import { getAdminCategories, createProductCategory } from "@/lib/api/admin";
 
 const inputClass =
   "h-11 w-full rounded-lg border border-gray-200 px-3 text-sm outline-none transition-colors placeholder:text-gray-400 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20";
@@ -27,11 +27,28 @@ export function ProductForm({ initialData = null, onSubmit, isEditing = false })
 
   const [thumbnailFile, setThumbnailFile] = useState(null);
   const [thumbnailPreview, setThumbnailPreview] = useState(initialData?.thumbnail || null);
-  const [isCustomCategory, setIsCustomCategory] = useState(false);
-  const [customCategory, setCustomCategory] = useState("");
-
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
+  const [isCatDropdownOpen, setIsCatDropdownOpen] = useState(false);
+  const [catSearchQuery, setCatSearchQuery] = useState("");
+  const catDropdownRef = useRef(null);
+
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (catDropdownRef.current && !catDropdownRef.current.contains(e.target)) {
+        setIsCatDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const filteredCategories = categories.filter((c) =>
+    c.toLowerCase().includes(catSearchQuery.toLowerCase())
+  );
 
   useEffect(() => {
     getAdminCategories()
@@ -58,14 +75,24 @@ export function ProductForm({ initialData = null, onSubmit, isEditing = false })
   };
 
   const handleCategorySelect = (e) => {
-    const val = e.target.value;
-    if (val === "__CUSTOM__") {
-      setIsCustomCategory(true);
-      setFormData((prev) => ({ ...prev, category: "" }));
-    } else {
-      setIsCustomCategory(false);
-      setFormData((prev) => ({ ...prev, category: val }));
+    setFormData((prev) => ({ ...prev, category: e.target.value }));
+  };
+
+  const handleAddCustomCategory = async () => {
+    const trimmed = newCategoryName.trim();
+    if (trimmed) {
+      try {
+        await createProductCategory(trimmed);
+      } catch (err) {
+        console.error("Failed to create category on backend:", err);
+      }
+      if (!categories.includes(trimmed)) {
+        setCategories((prev) => [...prev, trimmed]);
+      }
+      setFormData((prev) => ({ ...prev, category: trimmed }));
     }
+    setShowCategoryModal(false);
+    setNewCategoryName("");
   };
 
   const handleSubmit = async (e) => {
@@ -75,10 +102,9 @@ export function ProductForm({ initialData = null, onSubmit, isEditing = false })
 
     try {
       const data = new FormData();
-      const finalCategory = isCustomCategory ? customCategory.trim() : formData.category;
-
+      
       if (!formData.name.trim()) throw new Error("Product name is required.");
-      if (!finalCategory) throw new Error("Category is required.");
+      if (!formData.category) throw new Error("Category is required.");
       if (!formData.price) throw new Error("Price is required.");
       if (!isEditing && !thumbnailFile && !thumbnailPreview) {
         throw new Error("Main thumbnail image is required.");
@@ -86,7 +112,7 @@ export function ProductForm({ initialData = null, onSubmit, isEditing = false })
 
       data.append("name", formData.name);
       data.append("description", formData.description);
-      data.append("category", finalCategory);
+      data.append("category", formData.category);
       data.append("unit", formData.unit);
       data.append("price", formData.price);
       if (formData.compareAtPrice) data.append("compareAtPrice", formData.compareAtPrice);
@@ -155,41 +181,62 @@ export function ProductForm({ initialData = null, onSubmit, isEditing = false })
         <label className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between">
             <span className="text-sm font-semibold text-gray-700">Category *</span>
-            {isCustomCategory && (
-              <button
-                type="button"
-                onClick={() => setIsCustomCategory(false)}
-                className="text-xs text-emerald-600 underline"
-              >
-                ← Select from list
-              </button>
-            )}
           </div>
 
-          {isCustomCategory ? (
-            <input
-              type="text"
-              required
-              value={customCategory}
-              onChange={(e) => setCustomCategory(e.target.value)}
-              placeholder="Enter custom category..."
-              className={inputClass}
-            />
-          ) : (
-            <select
-              name="category"
-              required
-              value={formData.category}
-              onChange={handleCategorySelect}
-              className={inputClass}
+          <div className="relative" ref={catDropdownRef}>
+            <div
+              onClick={() => setIsCatDropdownOpen(!isCatDropdownOpen)}
+              className={`${inputClass} flex items-center justify-between cursor-pointer bg-white`}
             >
-              <option value="" disabled>Select category</option>
-              {categories.map((cat) => (
-                <option key={cat} value={cat}>{cat}</option>
-              ))}
-              <option value="__CUSTOM__">+ Add Custom Category...</option>
-            </select>
-          )}
+                <span className={formData.category ? "text-gray-900" : "text-gray-400"}>
+                  {formData.category || "Select category"}
+                </span>
+                <span className="text-gray-400 text-xs">▼</span>
+              </div>
+
+              {isCatDropdownOpen && (
+                <div className="absolute z-10 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg overflow-hidden">
+                  <div className="p-2 border-b border-gray-100">
+                    <input
+                      type="text"
+                      autoFocus
+                      placeholder="Search category..."
+                      value={catSearchQuery}
+                      onChange={(e) => setCatSearchQuery(e.target.value)}
+                      className="w-full rounded-md border border-gray-200 px-3 py-1.5 text-sm outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
+                    />
+                  </div>
+                  <ul className="max-h-60 overflow-y-auto py-1">
+                    {filteredCategories.length > 0 ? (
+                      filteredCategories.map((cat) => (
+                        <li
+                          key={cat}
+                          onClick={() => {
+                            setFormData((prev) => ({ ...prev, category: cat }));
+                            setIsCatDropdownOpen(false);
+                            setCatSearchQuery("");
+                          }}
+                          className={`cursor-pointer px-3 py-2 text-sm hover:bg-emerald-50 hover:text-emerald-700 ${formData.category === cat ? "bg-emerald-50 text-emerald-700 font-medium" : "text-gray-700"}`}
+                        >
+                          {cat}
+                        </li>
+                      ))
+                    ) : (
+                      <li className="px-3 py-2 text-sm text-gray-500">No categories found</li>
+                    )}
+                    <li
+                      onClick={() => {
+                        setIsCatDropdownOpen(false);
+                        setShowCategoryModal(true);
+                      }}
+                      className="cursor-pointer px-3 py-2 text-sm text-emerald-600 font-medium hover:bg-emerald-50 border-t border-gray-100"
+                    >
+                      + Add Custom Category...
+                    </li>
+                  </ul>
+                </div>
+              )}
+            </div>
         </label>
 
         <label className="flex flex-col gap-1.5">
@@ -288,7 +335,11 @@ export function ProductForm({ initialData = null, onSubmit, isEditing = false })
         {thumbnailPreview && (
           <div className="relative h-44 w-full overflow-hidden rounded-xl border border-gray-200 bg-gray-50">
             <Image
-              src={`${process.env.NEXT_PUBLIC_IMAGE_URL}${thumbnailPreview}`}
+              src={
+                thumbnailPreview.startsWith("blob:") || thumbnailPreview.startsWith("http")
+                  ? thumbnailPreview
+                  : `${process.env.NEXT_PUBLIC_IMAGE_URL || "http://localhost:4000"}${thumbnailPreview.startsWith("/") ? "" : "/"}${thumbnailPreview}`
+              }
               alt="Thumbnail Preview"
               fill
               unoptimized
@@ -324,6 +375,42 @@ export function ProductForm({ initialData = null, onSubmit, isEditing = false })
           {isSubmitting ? "Saving..." : isEditing ? "Update Product" : "Save Product"}
         </button>
       </div>
+
+      {/* Custom Category Modal */}
+      {showCategoryModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
+            <h3 className="mb-4 text-lg font-bold text-gray-900">Add Custom Category</h3>
+            <input
+              type="text"
+              autoFocus
+              value={newCategoryName}
+              onChange={(e) => setNewCategoryName(e.target.value)}
+              placeholder="e.g. Organic Fertilizers"
+              className={inputClass}
+            />
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowCategoryModal(false);
+                  setNewCategoryName("");
+                }}
+                className="rounded-lg px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleAddCustomCategory}
+                className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+              >
+                Add Category
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </form>
   );
 }

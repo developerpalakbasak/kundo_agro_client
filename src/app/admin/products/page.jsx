@@ -27,7 +27,9 @@ export default function AdminProductsPage() {
   };
 
   useEffect(() => {
-    loadProducts();
+    (async () => {
+      await loadProducts()
+    })();
   }, []);
 
   const handleDeleteProduct = async (id) => {

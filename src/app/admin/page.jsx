@@ -28,11 +28,17 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     if (user && isAdmin) {
       getDashboardStats()
-        .then((data) => {
-          if (data && data.stats) {
-            setStats(data.stats);
-          } else if (data) {
-            setStats(data);
+        .then((res) => {
+          if (res?.data) {
+            const dashboardData = res.data;
+            setStats({
+              productCount: dashboardData.stats?.products || 0,
+              userCount: dashboardData.stats?.users || 0,
+              blogCount: dashboardData.stats?.blogs || 0,
+              orderCount: dashboardData.stats?.orders || 0,
+              totalRevenue: dashboardData.stats?.totalRevenue || 0,
+              breakdown: dashboardData.breakdown || {},
+            });
           }
         })
         .catch((err) => {

@@ -32,7 +32,11 @@ export async function deleteAdminProduct(id) {
 
 // ── Categories Management (under admin products) ─────────────
 export async function getAdminCategories() {
-  return api.get("/categories/get-all");
+  return api.get("/products/categories");
+}
+
+export async function createProductCategory(name) {
+  return api.post("/products/categories", { name });
 }
 
 export async function createAdminCategory(categoryData) {
@@ -113,6 +117,10 @@ export async function resetUserPasswordByAdmin(userId, newPassword) {
 // ── Sellers Management (derived / filterable) ─────────────────
 export async function getAdminSellers() {
   // Sellers are products with seller info or user sellers
-  return api.get("/admin/products", { params: { isSeller: true } });
+  return api.get("/admin/sellers");
+}
+
+export async function toggleSellerStatus(id, status) {
+  return api.patch(`/admin/sellers/${id}/approve`, { status });
 }
 

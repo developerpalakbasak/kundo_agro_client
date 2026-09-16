@@ -46,11 +46,10 @@ export function AdminHeaderNav() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`cursor-pointer text-sm font-medium transition-colors ${
-                  isActive
+                className={`cursor-pointer text-sm font-medium transition-colors ${isActive
                     ? "font-semibold text-emerald-600"
                     : "text-gray-600 hover:text-emerald-600"
-                }`}
+                  }`}
               >
                 {t(link.key) || link.label}
               </Link>

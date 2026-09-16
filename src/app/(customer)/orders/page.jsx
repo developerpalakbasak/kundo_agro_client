@@ -283,8 +283,7 @@ export default function OrdersPage() {
                     <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg bg-white border border-gray-100">
                       <Image
                         src={
-                          item.thumbnail ||
-                          "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=400&q=80"
+                          item.thumbnail
                         }
                         alt={item.name}
                         fill
@@ -401,8 +400,7 @@ export default function OrdersPage() {
                       <div className="relative h-12 w-12 overflow-hidden rounded-xl bg-gray-100 border border-gray-100 flex-shrink-0">
                         <Image
                           src={
-                            item.thumbnail ||
-                            "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=400&q=80"
+                            item.thumbnail
                           }
                           alt={item.name}
                           fill

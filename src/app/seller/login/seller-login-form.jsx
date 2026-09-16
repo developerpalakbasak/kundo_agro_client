@@ -48,14 +48,16 @@ export function SellerLoginForm() {
       {/* Brand Header */}
       <div className="flex flex-col items-center text-center gap-2 mb-6">
         <div className="relative p-2 rounded-2xl bg-emerald-50/90 ring-1 ring-emerald-500/20 shadow-sm transition-transform hover:scale-105">
-          <Image
-            src="/kundu_logo.png"
-            alt="Kundu Agro & Fisheries"
-            width={52}
-            height={52}
-            priority
-            className="rounded-xl object-contain"
-          />
+          <Link href="/">
+            <Image
+              src="/kundu_logo.png"
+              alt="Kundu Agro & Fisheries"
+              width={52}
+              height={52}
+              priority
+              className="rounded-xl object-contain"
+            />
+          </Link>
         </div>
         <div>
           <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100/80 text-emerald-800 tracking-wide uppercase mb-1">

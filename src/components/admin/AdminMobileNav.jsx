@@ -60,19 +60,16 @@ export function AdminMobileNav() {
         className="flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-lg p-2 text-gray-700 transition-colors hover:bg-gray-100 md:hidden"
       >
         <span
-          className={`block h-0.5 w-5 rounded-full bg-current transition-all duration-300 ${
-            isOpen ? "translate-y-2 rotate-45" : ""
-          }`}
+          className={`block h-0.5 w-5 rounded-full bg-current transition-all duration-300 ${isOpen ? "translate-y-2 rotate-45" : ""
+            }`}
         />
         <span
-          className={`block h-0.5 w-5 rounded-full bg-current transition-all duration-300 ${
-            isOpen ? "opacity-0" : ""
-          }`}
+          className={`block h-0.5 w-5 rounded-full bg-current transition-all duration-300 ${isOpen ? "opacity-0" : ""
+            }`}
         />
         <span
-          className={`block h-0.5 w-5 rounded-full bg-current transition-all duration-300 ${
-            isOpen ? "-translate-y-2 -rotate-45" : ""
-          }`}
+          className={`block h-0.5 w-5 rounded-full bg-current transition-all duration-300 ${isOpen ? "-translate-y-2 -rotate-45" : ""
+            }`}
         />
       </button>
 
@@ -84,9 +81,8 @@ export function AdminMobileNav() {
       )}
 
       <div
-        className={`fixed inset-y-0 right-0 z-50 flex w-72 flex-col bg-white shadow-2xl transition-transform duration-300 ease-in-out md:hidden ${
-          isOpen ? "translate-x-0" : "translate-x-full"
-        }`}
+        className={`fixed inset-y-0 right-0 z-50 flex w-72 flex-col bg-white shadow-2xl transition-transform duration-300 ease-in-out md:hidden ${isOpen ? "translate-x-0" : "translate-x-full"
+          }`}
       >
         <div className="flex h-16 items-center justify-between border-b border-gray-100 px-5">
           <span className="text-sm font-semibold tracking-tight text-gray-900">
@@ -111,11 +107,10 @@ export function AdminMobileNav() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`cursor-pointer flex items-center rounded-xl px-4 py-3 text-sm font-medium transition-colors ${
-                  isActive
+                className={`cursor-pointer flex items-center rounded-xl px-4 py-3 text-sm font-medium transition-colors ${isActive
                     ? "bg-emerald-50 text-emerald-600 font-bold"
                     : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                }`}
+                  }`}
               >
                 {t(link.key) || link.label}
               </Link>

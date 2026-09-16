@@ -26,7 +26,7 @@ api.interceptors.response.use(
  * Format relative image/upload paths to full backend server URL
  */
 export function getImageUrl(path) {
-  if (!path) return "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=400&q=80";
+  if (!path) return null;
   if (path.startsWith("http://") || path.startsWith("https://")) return path;
   
   const serverOrigin = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1").replace(/\/api\/v1\/?$/, "");
