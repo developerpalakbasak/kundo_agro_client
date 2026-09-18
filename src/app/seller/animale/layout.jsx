@@ -1,6 +1,6 @@
 import { AuthProvider } from "@/context/AuthContext";
 import { SellerLayoutWrapper } from "@/components/seller/SellerLayoutWrapper";
-import "../globals.css";
+import "../../globals.css";
 
 export const metadata = {
   title: "Seller Portal | Kundu Agro & Fisheries",

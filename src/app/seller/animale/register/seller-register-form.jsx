@@ -52,9 +52,10 @@ export function SellerRegisterForm() {
         email: formData.email.trim(),
         phone: formData.phone.trim(),
         password: formData.password,
+        sellerFor: "animale",
       });
 
-      router.push("/seller");
+      router.push("/seller/animale");
     } catch (err) {
       setError(err.message || "Registration failed. Please try again.");
     } finally {
@@ -225,7 +226,7 @@ export function SellerRegisterForm() {
           <p className="text-xs text-slate-500">
             Already have a seller account?{" "}
             <Link
-              href="/seller/login"
+              href="/seller/animale/login"
               className="font-bold text-emerald-600 hover:text-emerald-700 hover:underline"
             >
               Sign In →

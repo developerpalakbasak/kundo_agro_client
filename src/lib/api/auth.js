@@ -1,10 +1,11 @@
 import api from "./axios";
 
-export async function loginUser({ email, identifier, password }) {
+export async function loginUser({ email, identifier, password, sellerFor }) {
   return api.post("/auth/login", { 
     email: email || identifier,
     identifier: identifier || email, 
-    password 
+    password,
+    sellerFor
   });
 }
 

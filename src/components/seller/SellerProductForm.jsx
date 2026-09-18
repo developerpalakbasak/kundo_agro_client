@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useLanguage } from "@/hooks/languageContext";
 import { getCategories, getDistricts, getUnits } from "@/lib/api/products";
 import { getImageUrl } from "@/lib/api/axios";
@@ -34,6 +34,8 @@ export function SellerProductForm({
   isEditing = false,
 }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const basePath = pathname.startsWith("/seller/animale") ? "/seller/animale" : "/seller/fish";
   const { t, language } = useLanguage();
 
   const [categories, setCategories] = useState(defaultCategories);
@@ -46,6 +48,7 @@ export function SellerProductForm({
     category: initialData?.category || "Fish seed / মাছের পোনা",
     unit: initialData?.unit || "piece",
     price: initialData?.price || "",
+    productFor:basePath == "/seller/animale"?"animale":"fish",
     compareAtPrice: initialData?.compareAtPrice || "",
     location: initialData?.location || initialData?.sellerDistrict || "",
     video: initialData?.video || "",
@@ -180,6 +183,10 @@ export function SellerProductForm({
 
       data.append("isAvailable", String(formData.isAvailable));
 
+      if (formData.productFor) {
+        data.append("productFor", formData.productFor);
+      }
+
       if (thumbnailFile) {
         data.append("thumbnail", thumbnailFile);
       }
@@ -188,7 +195,7 @@ export function SellerProductForm({
         await onSubmit(data);
       }
 
-      router.push("/seller/products");
+      router.push(`${basePath}/products`);
     } catch (err) {
       setErrorMsg(err.message || "An error occurred while saving the product.");
     } finally {
@@ -489,7 +496,7 @@ export function SellerProductForm({
       <div className="flex flex-wrap items-center justify-end gap-3 border-t border-gray-100 pt-5">
         <button
           type="button"
-          onClick={() => router.push("/seller/products")}
+          onClick={() => router.push(`${basePath}/products`)}
           className="cursor-pointer rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-50"
         >
           {language === "bn" ? "বাতিল" : "Cancel"}

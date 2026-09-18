@@ -21,7 +21,7 @@ export default function NewSellerProductPage() {
           </p>
         </div>
         <Link
-          href="/seller/products"
+          href="/seller/animale/products"
           className="text-xs font-semibold text-gray-500 hover:text-gray-900 transition-colors"
         >
           ← Back to products

@@ -26,11 +26,11 @@ export function SellerLoginForm() {
 
     try {
       setLoading(true);
-      const res = await login({ email: email.trim(), password });
+      const res = await login({ email: email.trim(), password, sellerFor: "fish" });
 
       const role = res?.user?.role;
       if (role && ["Seller", "Admin"].includes(role)) {
-        router.push("/seller");
+        router.push("/seller/fish");
       } else {
         setError(
           "Access denied. This account is registered as a customer. Please use a Seller account."
@@ -187,7 +187,7 @@ export function SellerLoginForm() {
           <p className="text-xs text-slate-500">
             Don&apos;t have a seller account yet?{" "}
             <Link
-              href="/seller/register"
+              href="/seller/fish/register"
               className="font-bold text-emerald-600 hover:text-emerald-700 hover:underline"
             >
               Register your Hatchery →

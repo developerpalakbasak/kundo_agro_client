@@ -134,7 +134,7 @@ export function CustomerHeader() {
                 {portalsDropdownOpen && (
                   <div className="absolute right-0 mt-2 w-56 rounded-2xl border border-gray-100 bg-white p-2 shadow-xl animate-scale-in z-50 space-y-1">
                     <Link
-                      href="/seller"
+                      href="/seller/fish"
                       onClick={() => setPortalsDropdownOpen(false)}
                       className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-bold text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors"
                     >
@@ -142,6 +142,19 @@ export function CustomerHeader() {
                       <div>
                         <div>{language === "bn" ? "পোনা বিক্রেতা পোর্টাল" : "Fish Seed Seller Portal"}</div>
                         <div className="text-[10px] font-normal text-gray-400">Hatchery & Fry Management</div>
+                      </div>
+                    </Link>
+                    <Link
+                      href="/seller/animale"
+                      onClick={() => setPortalsDropdownOpen(false)}
+                      className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-bold text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors"
+                    >
+                      <span className="text-base">🐄</span>
+                      <div>
+                        <div>{language === "bn" ? "গবাদি পশু বিক্রেতা পোর্টাল" : "Cattle Seller Portal"}</div>
+                        <div className="text-[10px] font-normal text-gray-400">
+                          Livestock & Animal Management
+                        </div>
                       </div>
                     </Link>
                     <Link
@@ -345,11 +358,18 @@ export function CustomerHeader() {
                     {language === "bn" ? "পোর্টালসমূহ" : "Portals"}
                   </p>
                   <Link
-                    href="/seller"
+                    href="/seller/fish"
                     onClick={() => setMobileMenuOpen(false)}
                     className="flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-50 transition-colors"
                   >
                     🐟 {language === "bn" ? "পোনা বিক্রেতা পোর্টাল" : "Fish Seed Seller Portal"}
+                  </Link>
+                  <Link
+                    href="/seller/animale"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-50 transition-colors"
+                  >
+                    🐄 {language === "bn" ? "গবাদি পশু বিক্রেতা পোর্টাল" : "Cattle Seller Portal"}
                   </Link>
                   <Link
                     href="/admin/login"

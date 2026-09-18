@@ -52,7 +52,7 @@ export default function EditSellerProductPage({ params }) {
           ⚠️ {errorMsg || "Product not found"}
         </p>
         <Link
-          href="/seller/products"
+          href="/seller/fish/products"
           className="inline-block text-xs font-bold text-red-700 underline"
         >
           ← Back to products
@@ -73,7 +73,7 @@ export default function EditSellerProductPage({ params }) {
           </p>
         </div>
         <Link
-          href="/seller/products"
+          href="/seller/fish/products"
           className="text-xs font-semibold text-gray-500 hover:text-gray-900 transition-colors"
         >
           ← Back to products

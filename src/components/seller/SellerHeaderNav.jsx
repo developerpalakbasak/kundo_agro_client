@@ -7,24 +7,27 @@ import { useLanguage } from "@/hooks/languageContext";
 import { useAuth } from "@/context/AuthContext";
 import { ChangePasswordModal } from "@/components/admin/ChangePasswordModal";
 
-const navLinks = [
-  { href: "/seller", key: "sellerDashboard", label: "Dashboard" },
-  { href: "/seller/products", key: "products", label: "Products" },
-  { href: "/seller/products/new", key: "addProduct", label: "+ Add Product" },
-  { href: "/seller/orders", key: "orders", label: "Orders" },
-];
+
 
 export function SellerHeaderNav() {
   const pathname = usePathname();
+  const basePath = pathname.startsWith("/seller/animale") ? "/seller/animale" : "/seller/fish";
   const router = useRouter();
   const { t, language } = useLanguage();
   const { user, logout, isVerifiedSeller } = useAuth();
   const [showPasswordModal, setShowPasswordModal] = useState(false);
 
+  const navLinks = [
+    { href: basePath, key: "sellerDashboard", label: "Dashboard" },
+    { href: `${basePath}/products`, key: "products", label: "Products" },
+    { href: `${basePath}/products/new`, key: "addProduct", label: "+ Add Product" },
+    { href: `${basePath}/orders`, key: "orders", label: "Orders" },
+  ];
+
   const handleLogout = async () => {
     try {
       if (logout) await logout();
-      router.push("/seller/login");
+      router.push(`${basePath}/login`);
     } catch (err) {
       console.error("Logout failed:", err);
     }
@@ -36,8 +39,8 @@ export function SellerHeaderNav() {
         <nav className="flex items-center gap-4">
           {navLinks.map((link) => {
             const isActive =
-              link.href === "/seller"
-                ? pathname === "/seller"
+              link.href === basePath
+                ? pathname === basePath
                 : pathname.startsWith(link.href);
 
             return (

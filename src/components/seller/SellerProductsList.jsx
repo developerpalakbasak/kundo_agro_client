@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useLanguage } from "@/hooks/languageContext";
 import { getImageUrl } from "@/lib/api/axios";
 
@@ -16,6 +17,8 @@ function formatPrice(value, locale) {
 
 export function SellerProductsList({ products = [], onDeleteProduct }) {
   const { t, language } = useLanguage();
+  const pathname = usePathname();
+  const basePath = pathname.startsWith("/seller/animale") ? "/seller/animale" : "/seller/fish";
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -90,7 +93,7 @@ export function SellerProductsList({ products = [], onDeleteProduct }) {
         </div>
 
         <Link
-          href="/seller/products/new"
+          href={`${basePath}/products/new`}
           className="cursor-pointer rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition-all hover:bg-emerald-700 active:scale-95"
         >
           {t("addProduct") || "+ Add New Product"}
@@ -176,7 +179,7 @@ export function SellerProductsList({ products = [], onDeleteProduct }) {
                 : "Get started by adding your first product listing to start receiving orders."}
           </p>
           <Link
-            href="/seller/products/new"
+            href={`${basePath}/products/new`}
             className="cursor-pointer rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-xs transition-all hover:bg-emerald-700 active:scale-95"
           >
             {t("addProduct") || "+ Add First Product"}
@@ -256,7 +259,7 @@ export function SellerProductsList({ products = [], onDeleteProduct }) {
                   onClick={(e) => e.stopPropagation()}
                 >
                   <Link
-                    href={`/seller/products/${productId}/edit`}
+                    href={`${basePath}/products/${productId}/edit`}
                     className="cursor-pointer rounded-xl border border-gray-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-gray-700 transition-colors hover:border-emerald-600 hover:text-emerald-600"
                   >
                     ✏️ {t("edit") || "Edit"}
@@ -355,7 +358,7 @@ export function SellerProductsList({ products = [], onDeleteProduct }) {
 
             <div className="flex justify-end gap-2 pt-2 border-t border-gray-100">
               <Link
-                href={`/seller/products/${selectedProduct._id || selectedProduct.id}/edit`}
+                href={`${basePath}/products/${selectedProduct._id || selectedProduct.id}/edit`}
                 className="rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-700 transition-colors"
               >
                 Edit Product

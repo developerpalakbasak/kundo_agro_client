@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useLanguage } from "@/hooks/languageContext";
 import { getImageUrl } from "@/lib/api/axios";
 
@@ -26,6 +27,8 @@ export function SellerDashboardContent({
   seller = {},
 }) {
   const { t, language } = useLanguage();
+  const pathname = usePathname();
+  const basePath = pathname.startsWith("/seller/animale") ? "/seller/animale" : "/seller/fish";
 
   const totalProducts = stats.totalProducts || 0;
   const availableProducts = stats.availableProducts || 0;
@@ -61,13 +64,13 @@ export function SellerDashboardContent({
 
         <div className="flex items-center gap-3">
           <Link
-            href="/seller/products/new"
+            href={`${basePath}/products/new`}
             className="cursor-pointer rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition-all hover:bg-emerald-700 active:scale-95"
           >
             {t("addProduct") || "+ Add Product"}
           </Link>
           <Link
-            href="/seller/products"
+            href={`${basePath}/products`}
             className="cursor-pointer rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition-all hover:border-gray-300 hover:bg-gray-50"
           >
             {t("manageProducts") || "View Products"}
@@ -79,7 +82,7 @@ export function SellerDashboardContent({
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* Total Products */}
         <Link
-          href="/seller/products"
+          href={`${basePath}/products`}
           className="group rounded-2xl border border-gray-100 bg-white p-5 shadow-xs transition-all hover:border-emerald-200 hover:shadow-md"
         >
           <div className="flex items-center justify-between">
@@ -116,7 +119,7 @@ export function SellerDashboardContent({
 
         {/* Total Orders */}
         <Link
-          href="/seller/orders"
+          href={`${basePath}/orders`}
           className="group rounded-2xl border border-gray-100 bg-white p-5 shadow-xs transition-all hover:border-blue-200 hover:shadow-md"
         >
           <div className="flex items-center justify-between">
@@ -201,7 +204,7 @@ export function SellerDashboardContent({
                 {language === "bn" ? "সাম্প্রতিক পণ্যসমূহ" : "Recent Products"}
               </h2>
               <Link
-                href="/seller/products"
+                href={`${basePath}/products`}
                 className="text-xs font-semibold text-emerald-600 hover:text-emerald-700"
               >
                 {language === "bn" ? "সবগুলো দেখুন →" : "View All →"}
@@ -215,7 +218,7 @@ export function SellerDashboardContent({
                   {language === "bn" ? "কোন পণ্য যোগ করা হয়নি" : "No products added yet."}
                 </p>
                 <Link
-                  href="/seller/products/new"
+                  href={`${basePath}/products/new`}
                   className="mt-3 inline-block text-xs font-bold text-emerald-600 hover:underline"
                 >
                   {language === "bn" ? "+ প্রথম পণ্য যোগ করুন" : "+ Add your first product"}
@@ -266,7 +269,7 @@ export function SellerDashboardContent({
                       </div>
 
                       <Link
-                        href={`/seller/products/${id}/edit`}
+                        href={`${basePath}/products/${id}/edit`}
                         className="shrink-0 rounded-lg border border-gray-200 px-2.5 py-1 text-xs font-medium text-gray-600 hover:border-emerald-600 hover:text-emerald-600 transition-colors"
                       >
                         {t("edit") || "Edit"}
@@ -280,7 +283,7 @@ export function SellerDashboardContent({
 
           <div className="mt-4 pt-4 border-t border-gray-100 text-center">
             <Link
-              href="/seller/products/new"
+              href={`${basePath}/products/new`}
               className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 hover:text-emerald-700"
             >
               <span>+</span>
@@ -297,7 +300,7 @@ export function SellerDashboardContent({
                 {language === "bn" ? "সাম্প্রতিক অর্ডারসমূহ" : "Recent Orders"}
               </h2>
               <Link
-                href="/seller/orders"
+                href={`${basePath}/orders`}
                 className="text-xs font-semibold text-emerald-600 hover:text-emerald-700"
               >
                 {language === "bn" ? "সবগুলো দেখুন →" : "View All →"}
@@ -374,7 +377,7 @@ export function SellerDashboardContent({
 
           <div className="mt-4 pt-4 border-t border-gray-100 text-center">
             <Link
-              href="/seller/orders"
+              href={`${basePath}/orders`}
               className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 hover:text-emerald-700"
             >
               <span>{language === "bn" ? "সমস্ত অর্ডার বিস্তারিত দেখুন" : "View Full Order List"}</span>

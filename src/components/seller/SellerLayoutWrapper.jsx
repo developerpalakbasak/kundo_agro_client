@@ -16,15 +16,16 @@ function SellerLayoutInner({ children }) {
   const { user, loading, isVerifiedSeller, isSeller } = useAuth();
   const { t, language } = useLanguage();
 
+  const basePath = pathname.startsWith("/seller/animale") ? "/seller/animale" : "/seller/fish";
   const isAuthPage =
-    pathname === "/seller/login" || pathname === "/seller/register";
+    pathname === `${basePath}/login` || pathname === `${basePath}/register`;
 
   useEffect(() => {
     if (!loading && !isAuthPage) {
       if (!user) {
-        router.push("/seller/login");
+        router.push(`${basePath}/login`);
       } else if (!isSeller) {
-        router.push("/seller/login?error=unauthorized");
+        router.push(`${basePath}/login?error=unauthorized`);
       }
     }
   }, [loading, user, isSeller, isAuthPage, router]);
@@ -54,7 +55,7 @@ function SellerLayoutInner({ children }) {
       <header className="sticky top-0 z-30 border-b border-gray-100 bg-white/95 backdrop-blur-md shadow-xs">
         <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4">
           {/* Brand & Portal Badge */}
-          <Link href="/seller" className="flex items-center gap-3 group">
+          <Link href={basePath} className="flex items-center gap-3 group">
             <Image
               src="/kundu_logo.png"
               alt="Kundu Agro and Fisheries logo"
