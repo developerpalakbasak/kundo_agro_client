@@ -45,6 +45,11 @@ export function CustomerFooter() {
                                 </Link>
                             </li>
                             <li>
+                                <Link href="/about" className="hover:text-primary transition-colors">
+                                    {t("about")}
+                                </Link>
+                            </li>
+                            <li>
                                 <Link href="/blogs" className="hover:text-primary transition-colors">
                                     {t("blogs")}
                                 </Link>
@@ -77,16 +82,16 @@ export function CustomerFooter() {
                     {/* Contact & Support */}
                     <div>
                         <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-400">
-                            Support
+                            Head Office / যোগাযোগ
                         </h4>
-                        <p className="mt-3 text-xs text-gray-600">
-                            Email: info@kunduagro.com
+                        <p className="mt-3 text-xs text-gray-600 font-medium">
+                            Panchbibi Road, Joypurhat Sadar, Joypurhat-5900
                         </p>
                         <p className="mt-1 text-xs text-gray-600">
-                            Hotline: +880 1700-000000
+                            Phone: <a href="tel:01713747714" className="hover:text-primary font-semibold">01713747714</a>
                         </p>
-                        <p className="mt-1 text-xs text-gray-400">
-                            Dhaka & Khulna Division, Bangladesh
+                        <p className="mt-1 text-xs text-gray-500 break-all">
+                            Email: <a href="mailto:dabotoshkundu.bappa@gmail.com" className="hover:text-primary">dabotoshkundu.bappa@gmail.com</a>
                         </p>
                     </div>
                 </div>

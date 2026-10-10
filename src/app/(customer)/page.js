@@ -1,10 +1,13 @@
 import { LanguageProvider } from "@/hooks/languageContext";
 import Home from "../../components/Home";
 
-// Demo data for preview – replace with real API data later
-const demoProducts = [
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+
+// Fallback demo data for preview if backend is unreachable
+const fallbackProducts = [
   {
     id: "1",
+    _id: "1",
     name: "Sample Seed",
     category: "Seeds",
     thumbnail: "/seed.jpg",
@@ -14,6 +17,7 @@ const demoProducts = [
   },
   {
     id: "2",
+    _id: "2",
     name: "Sample Fish",
     category: "Fish",
     thumbnail: "/fish.jpg",
@@ -23,13 +27,29 @@ const demoProducts = [
   },
 ];
 
-export default function HomePage() {
+async function getLatestProducts() {
+  try {
+    const res = await fetch(`${API_BASE}/api/v1/products?limit=6&sort=-createdAt`, {
+      cache: "no-store",
+    });
+    if (!res.ok) return fallbackProducts;
+    const json = await res.json();
+    return json.data && json.data.length > 0 ? json.data : fallbackProducts;
+  } catch (error) {
+    console.warn("Failed to fetch products from backend, using fallback:", error.message);
+    return fallbackProducts;
+  }
+}
+
+export default async function HomePage() {
+  const products = await getLatestProducts();
+
   return (
     <div>
       <LanguageProvider>
-        <Home featuredProducts={demoProducts} latestBlogs={[]} />
-
+        <Home featuredProducts={products} latestBlogs={[]} />
       </LanguageProvider>
     </div>
   );
 }
+

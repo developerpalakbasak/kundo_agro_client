@@ -63,6 +63,7 @@ export function CustomerHeader() {
   const primaryNavLinks = [
     { href: "/", key: "home" },
     { href: "/products", key: "shop" },
+    { href: "/about", key: "about" },
     ...(user ? [{ href: "/orders", key: "myOrders" }] : []),
     { href: "/blogs", key: "blogs" },
   ];

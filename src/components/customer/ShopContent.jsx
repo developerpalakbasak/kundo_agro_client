@@ -2,9 +2,9 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Modal } from "@/components/modal";
 import { useLanguage } from "@/hooks/languageContext";
 import { getProducts, createFishSeedProduct, getCategories, getDistricts, getUnits } from "@/lib/api/products";
 import { useCart } from "@/context/cartContext";
@@ -30,9 +30,6 @@ export function ShopContent({ initialCategory = "all" }) {
     const [searchQuery, setSearchQuery] = useState("");
     const [isDistrictDropdownOpen, setIsDistrictDropdownOpen] = useState(false);
     const [districtSearchQuery, setDistrictSearchQuery] = useState("");
-
-    // Product Detail modal state
-    const [selectedProduct, setSelectedProduct] = useState(null);
 
     const { t, language } = useLanguage();
     const { addToCart } = useCart();
@@ -81,30 +78,30 @@ export function ShopContent({ initialCategory = "all" }) {
             });
     }, []);
 
+    const loadProducts = async () => {
+        setIsLoading(true);
+        setLoadError(null);
+        try {
+            const params = {};
+            if (selectedCategory !== "all") params.category = selectedCategory;
+            if (searchQuery.trim()) params.search = searchQuery.trim();
+
+            const res = await getProducts(params);
+            if (res.data && Array.isArray(res.data)) {
+                setProducts(res.data);
+            } else {
+                setProducts([]);
+            }
+        } catch (err) {
+            setLoadError(err.message || "Failed to load products from server.");
+            setProducts([]);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     // Fetch products from backend API
     useEffect(() => {
-        const loadProducts = async () => {
-            setIsLoading(true);
-            setLoadError(null);
-            try {
-                const params = {};
-                if (selectedCategory !== "all") params.category = selectedCategory;
-                if (searchQuery.trim()) params.search = searchQuery.trim();
-
-                const res = await getProducts(params);
-                if (res.data && Array.isArray(res.data)) {
-                    setProducts(res.data);
-                } else {
-                    setProducts([]);
-                }
-            } catch (err) {
-                setLoadError(err.message || "Failed to load products from server.");
-                setProducts([]);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
         const timer = setTimeout(() => {
             loadProducts();
         }, 300); // debounce search query
@@ -138,6 +135,13 @@ export function ShopContent({ initialCategory = "all" }) {
     });
 
     const isFishSeedCategory = selectedCategory === "Fish seed / মাছের পোনা";
+
+    const resolveImageUrl = (path) => {
+        if (!path) return "/fish.jpg";
+        if (path.startsWith("http://") || path.startsWith("https://")) return path;
+        const base = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+        return `${base}${path.startsWith("/") ? "" : "/"}${path}`;
+    };
 
     return (
         <div className="w-full">
@@ -361,16 +365,19 @@ export function ShopContent({ initialCategory = "all" }) {
                 <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     {filteredProducts.map((product) => {
                         const isFishSeed = product.category === "Fish seed / মাছের পোনা";
+                        const productIdentifier = product.slug || product._id || product.id;
                         return (
                             <div
-                                key={product._id || product.id}
-                                onClick={() => setSelectedProduct(product)}
-                                className="group relative flex flex-col justify-between rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md cursor-pointer"
+                                key={productIdentifier}
+                                className="group relative flex flex-col justify-between rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
                             >
                                 <div>
-                                    <div className="relative h-48 w-full overflow-hidden rounded-xl bg-gray-100 mb-3">
+                                    <Link
+                                        href={`/product/${encodeURIComponent(productIdentifier)}`}
+                                        className="relative h-48 w-full overflow-hidden rounded-xl bg-gray-100 mb-3 block"
+                                    >
                                         <Image
-                                            src={`${process.env.NEXT_PUBLIC_API_URL}${product.thumbnail}`}
+                                            src={resolveImageUrl(product.thumbnail)}
                                             alt={product.name}
                                             fill
                                             unoptimized
@@ -381,13 +388,18 @@ export function ShopContent({ initialCategory = "all" }) {
                                                 🐟 Fish Seed
                                             </span>
                                         )}
-                                    </div>
+                                    </Link>
                                     <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
                                         {product.category}
                                     </span>
-                                    <h3 className="mt-1 text-base font-bold text-foreground group-hover:text-primary transition-colors">
-                                        {product.name}
-                                    </h3>
+                                    <Link
+                                        href={`/product/${encodeURIComponent(productIdentifier)}`}
+                                        className="block"
+                                    >
+                                        <h3 className="mt-1 text-base font-bold text-foreground group-hover:text-primary transition-colors">
+                                            {product.name}
+                                        </h3>
+                                    </Link>
                                     <p className="mt-1 text-xs text-gray-500 line-clamp-2">
                                         {product.description}
                                     </p>
@@ -418,7 +430,7 @@ export function ShopContent({ initialCategory = "all" }) {
                                             </span>
                                         )}
                                     </div>
-                                    <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                                    <div className="flex items-center gap-2">
                                         {product.sellerPhone && (
                                             <a
                                                 href={`tel:${product.sellerPhone}`}
@@ -430,10 +442,7 @@ export function ShopContent({ initialCategory = "all" }) {
                                         )}
                                         <button
                                             type="button"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                addToCart(product);
-                                            }}
+                                            onClick={() => addToCart(product)}
                                             className="cursor-pointer rounded-xl bg-primary px-3.5 py-2 text-xs font-bold text-white shadow-sm hover:bg-primary/90 transition-colors"
                                         >
                                             {t("addToCart")}
@@ -445,95 +454,7 @@ export function ShopContent({ initialCategory = "all" }) {
                     })}
                 </div>
             )}
-
-            {/* Product Detail Modal */}
-            <Modal
-                isOpen={!!selectedProduct}
-                onClose={() => setSelectedProduct(null)}
-                title={selectedProduct?.name || "Product Details"}
-                maxWidth="lg"
-            >
-                {selectedProduct && (
-                    <div className="space-y-5">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
-                            <div className="relative h-56 sm:h-64 w-full overflow-hidden rounded-2xl bg-gray-100 shadow-sm border border-gray-100">
-                                <Image
-                                    src={selectedProduct.thumbnail}
-                                    alt={selectedProduct.name}
-                                    fill
-                                    className="object-cover"
-                                />
-                            </div>
-                            <div className="space-y-3">
-                                <span className="inline-block rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
-                                    {selectedProduct.category}
-                                </span>
-                                <h2 className="text-xl font-extrabold text-foreground">
-                                    {selectedProduct.name}
-                                </h2>
-                                <div className="flex items-baseline gap-2">
-                                    <span className="text-2xl font-black text-primary">
-                                        ৳{selectedProduct.price}
-                                    </span>
-                                    <span className="text-xs text-muted-foreground">
-                                        / {selectedProduct.unit || "piece"}
-                                    </span>
-                                    {selectedProduct.compareAtPrice && (
-                                        <span className="text-xs text-gray-400 line-through ml-2">
-                                            ৳{selectedProduct.compareAtPrice}
-                                        </span>
-                                    )}
-                                </div>
-                                {selectedProduct.sellerName && (
-                                    <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-3 text-xs space-y-1">
-                                        <p className="font-bold text-emerald-950 flex items-center gap-1.5">
-                                            👨‍🌾 {selectedProduct.sellerName}
-                                        </p>
-                                        {selectedProduct.sellerDistrict && (
-                                            <p className="text-emerald-800 font-medium">
-                                                📍 {language === "bn" ? "জেলা:" : "District:"} {selectedProduct.sellerDistrict}
-                                            </p>
-                                        )}
-                                        {selectedProduct.sellerPhone && (
-                                            <p className="text-emerald-900 font-bold">
-                                                📞 {selectedProduct.sellerPhone}
-                                            </p>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                        <div className="border-t border-gray-100 pt-4 space-y-1.5">
-                            <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">
-                                {language === "bn" ? "পণ্যের বিস্তারিত বিবরণ" : "Product Description"}
-                            </h4>
-                            <p className="text-xs sm:text-sm text-gray-600 leading-relaxed whitespace-pre-line">
-                                {selectedProduct.description || (language === "bn" ? "কোন বিশেষ বিবরণ দেওয়া নেই।" : "No additional description provided.")}
-                            </p>
-                        </div>
-                        <div className="sticky bottom-0 bg-white/95 backdrop-blur-sm flex items-center justify-end gap-3 pt-4 border-t border-gray-100 z-10">
-                            {selectedProduct.sellerPhone && (
-                                <a
-                                    href={`tel:${selectedProduct.sellerPhone}`}
-                                    className="rounded-xl border border-emerald-600 bg-emerald-50 px-4 py-2.5 text-xs font-bold text-emerald-800 shadow-xs hover:bg-emerald-100 transition-colors flex items-center gap-1.5"
-                                >
-                                    📞 {language === "bn" ? "বিক্রেতাকে কল করুন" : "Call Seller"}
-                                </a>
-                            )}
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    addToCart(selectedProduct);
-                                    setSelectedProduct(null);
-                                }}
-                                className="cursor-pointer rounded-xl bg-primary px-5 py-2.5 text-xs font-bold text-white shadow-md hover:bg-primary/90 transition-colors"
-                            >
-                                {t("addToCart")}
-                            </button>
-                        </div>
-                    </div>
-                )}
-            </Modal>
         </div>
     );
 }
+

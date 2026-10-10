@@ -32,27 +32,27 @@ export default function Home({
     return (
         <div className="space-y-16 pb-16">
             {/* Hero Section */}
-            <section className="relative overflow-hidden pt-16 pb-20 rounded-3xl mx-4 my-2 shadow-xl border border-gray-100">
-                {/* Background Image & Overlay */}
+            <section className="relative overflow-hidden pt-16 pb-20 rounded-3xl mx-4 my-2 shadow-xl border border-emerald-500/20">
+                {/* Background Agro & Fisheries Image & Transparent Cinematic Overlay */}
                 <div className="absolute inset-0 -z-10">
                     <Image
-                        src="/Gemini_Generated_Image_dxkrqfdxkrqfdxkr.jpg"
-                        alt="Kundu Agro and Fisheries Hero Banner"
+                        src="/about-hero.jpg"
+                        alt="Kundu Agro and Fisheries scenic ponds and farmland"
                         fill
                         priority
                         className="object-cover object-center"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-r from-gray-950/85 via-gray-900/70 to-gray-950/80 backdrop-blur-[1px]" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-gray-950/70 via-gray-900/40 to-gray-950/50" />
                 </div>
 
                 <div className="mx-auto max-w-6xl px-4 text-center relative z-10">
-                    <span className="inline-flex items-center rounded-full bg-primary/20 backdrop-blur-md border border-primary/30 px-4 py-1.5 text-xs font-bold text-emerald-300 shadow-sm">
+                    <span className="inline-flex items-center rounded-full bg-black/40 backdrop-blur-md border border-white/20 px-4 py-1.5 text-xs font-bold text-emerald-300 shadow-sm">
                         {t("heroBadge")}
                     </span>
-                    <h1 className="mt-5 text-3xl font-extrabold tracking-tight text-white sm:text-5xl max-w-3xl mx-auto leading-tight drop-shadow-md">
+                    <h1 className="mt-5 text-3xl font-black tracking-tight text-white sm:text-5xl max-w-3xl mx-auto leading-tight drop-shadow-lg">
                         {t("heroTitle")}
                     </h1>
-                    <p className="mt-4 text-base text-gray-200 max-w-2xl mx-auto leading-relaxed drop-shadow">
+                    <p className="mt-4 text-base text-gray-100 max-w-2xl mx-auto leading-relaxed drop-shadow font-medium">
                         {t("heroSubtitle")}
                     </p>
                     <div className="mt-8 flex justify-center gap-4">
@@ -64,7 +64,7 @@ export default function Home({
                         </Link>
                         <Link
                             href="/blogs"
-                            className="rounded-xl border border-white/20 bg-white/10 backdrop-blur-md px-6 py-3.5 text-sm font-semibold text-white hover:bg-white/20 hover:scale-[1.02] transition-all"
+                            className="rounded-xl border border-white/30 bg-black/30 backdrop-blur-md px-6 py-3.5 text-sm font-semibold text-white hover:bg-black/40 hover:scale-[1.02] transition-all"
                         >
                             {t("exploreBlogs")}
                         </Link>
@@ -121,49 +121,71 @@ export default function Home({
                 </div>
 
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                    {(featuredProducts ?? []).slice(0, 6).map((product) => (
-                        <div
-                            key={product.id}
-                            className="group flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all hover:shadow-md"
-                        >
-                            <div className="relative h-48 w-full overflow-hidden bg-gray-50">
-                                <Image
-                                    src={product.thumbnail}
-                                    alt={product.name}
-                                    fill
-                                    className="object-cover transition-transform duration-300 group-hover:scale-105"
-                                />
-                                <span className="absolute top-3 left-3 rounded-full bg-white/90 backdrop-blur-sm px-2.5 py-0.5 text-[10px] font-bold text-gray-700 shadow-sm">
-                                    {product.category}
-                                </span>
-                            </div>
-                            <div className="flex flex-1 flex-col p-5">
-                                <h3 className="text-base font-bold text-gray-900 group-hover:text-primary transition-colors">
-                                    {product.name}
-                                </h3>
-                                <p className="mt-1 line-clamp-2 text-xs text-gray-500 flex-1">
-                                    {product.description}
-                                </p>
-                                <div className="mt-4 flex items-center justify-between pt-3 border-t border-gray-100">
-                                    <div>
-                                        <span className="text-base font-bold text-primary">
-                                            ৳{product.price}
-                                        </span>
-                                        <span className="text-xs text-gray-400 font-normal ml-1">
-                                            / {product.unit}
-                                        </span>
-                                    </div>
-                                    <button
-                                        type="button"
-                                        onClick={() => addToCart(product)}
-                                        className="cursor-pointer rounded-xl bg-primary/10 px-3.5 py-2 text-xs font-bold text-primary hover:bg-primary hover:text-white transition-colors"
+                    {(featuredProducts ?? []).slice(0, 6).map((product) => {
+                        const productIdentifier = product.slug || product._id || product.id;
+                        const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+                        const imageUrl = product.thumbnail
+                            ? (product.thumbnail.startsWith("http")
+                                ? product.thumbnail
+                                : `${API_BASE}${product.thumbnail.startsWith("/") ? "" : "/"}${product.thumbnail}`)
+                            : "/fish.jpg";
+
+                        return (
+                            <div
+                                key={productIdentifier}
+                                className="group flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all hover:shadow-md"
+                            >
+                                <Link
+                                    href={`/product/${encodeURIComponent(productIdentifier)}`}
+                                    className="relative h-48 w-full overflow-hidden bg-gray-50 block"
+                                >
+                                    <Image
+                                        src={imageUrl}
+                                        alt={product.name}
+                                        fill
+                                        unoptimized
+                                        className="object-cover transition-transform duration-300 group-hover:scale-105"
+                                    />
+                                    <span className="absolute top-3 left-3 rounded-full bg-white/90 backdrop-blur-sm px-2.5 py-0.5 text-[10px] font-bold text-gray-700 shadow-sm">
+                                        {product.category}
+                                    </span>
+                                </Link>
+                                <div className="flex flex-1 flex-col p-5">
+                                    <Link
+                                        href={`/product/${encodeURIComponent(productIdentifier)}`}
+                                        className="block"
                                     >
-                                        {t("addToCart")}
-                                    </button>
+                                        <h3 className="text-base font-bold text-gray-900 group-hover:text-primary transition-colors">
+                                            {product.name}
+                                        </h3>
+                                    </Link>
+                                    <p className="mt-1 line-clamp-2 text-xs text-gray-500 flex-1">
+                                        {product.description}
+                                    </p>
+                                    <div className="mt-4 flex items-center justify-between pt-3 border-t border-gray-100">
+                                        <div>
+                                            <span className="text-base font-bold text-primary">
+                                                ৳{product.price}
+                                            </span>
+                                            <span className="text-xs text-gray-400 font-normal ml-1">
+                                                / {product.unit}
+                                            </span>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                addToCart(product);
+                                            }}
+                                            className="cursor-pointer rounded-xl bg-primary/10 px-3.5 py-2 text-xs font-bold text-primary hover:bg-primary hover:text-white transition-colors"
+                                        >
+                                            {t("addToCart")}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             </section>
 
