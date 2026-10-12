@@ -8,6 +8,7 @@ export function OrdersList({ initialOrders = [], onUpdateStatus }) {
   const [orders, setOrders] = useState(initialOrders);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [filter, setFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
   const [updatingId, setUpdatingId] = useState(null);
 
   const handleStatusChange = async (orderId, newStatus) => {
@@ -33,8 +34,31 @@ export function OrdersList({ initialOrders = [], onUpdateStatus }) {
   };
 
   const filteredOrders = orders.filter((o) => {
-    if (filter === "all") return true;
-    return (o.status || "").toLowerCase() === filter.toLowerCase();
+    // Status filter
+    if (filter !== "all" && (o.status || "").toLowerCase() !== filter.toLowerCase()) {
+      return false;
+    }
+
+    // Search query filter (Order ID & Mobile Phone number, plus customer name)
+    if (searchTerm.trim()) {
+      const query = searchTerm.trim().toLowerCase().replace(/^#/, "");
+      const fullId = String(o._id || o.id || "").toLowerCase();
+      const shortId = fullId.slice(-6);
+      const customOrderId = String(o.orderId || "").toLowerCase();
+      const phone = String(o.phone || o.user?.phone || "").toLowerCase();
+      const name = String(o.customerName || o.user?.name || "").toLowerCase();
+
+      const matchesId =
+        fullId.includes(query) ||
+        shortId.includes(query) ||
+        customOrderId.includes(query);
+      const matchesPhone = phone.includes(query);
+      const matchesName = name.includes(query);
+
+      return matchesId || matchesPhone || matchesName;
+    }
+
+    return true;
   });
 
   const getBadgeStyle = (status) => {
@@ -55,8 +79,8 @@ export function OrdersList({ initialOrders = [], onUpdateStatus }) {
 
   return (
     <div className="space-y-6">
-      {/* Header & Filter */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      {/* Header & Search / Filters */}
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-gray-900">
             Orders Management
@@ -66,23 +90,62 @@ export function OrdersList({ initialOrders = [], onUpdateStatus }) {
           </p>
         </div>
 
-        {/* Status Filter */}
-        <div className="inline-flex rounded-xl bg-gray-100 p-1 border border-gray-200">
-          {["all", "pending", "processing", "shipped", "delivered", "cancelled"].map(
-            (statusKey) => (
-              <button
-                key={statusKey}
-                type="button"
-                onClick={() => setFilter(statusKey)}
-                className={`rounded-lg px-3 py-1.5 text-xs font-semibold capitalize transition-all cursor-pointer ${filter === statusKey
-                    ? "bg-white text-gray-900 shadow-xs"
-                    : "text-gray-600 hover:text-gray-900"
-                  }`}
+        {/* Search & Status Filters */}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+          {/* Search Input Box */}
+          <div className="relative min-w-[260px] sm:min-w-[300px]">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth="2"
+                stroke="currentColor"
               >
-                {statusKey}
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+                />
+              </svg>
+            </div>
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search by Order ID (#...) or Phone..."
+              className="w-full rounded-xl border border-gray-200 bg-white py-2 pl-9 pr-8 text-xs font-medium text-gray-900 placeholder-gray-400 shadow-2xs outline-none transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+            />
+            {searchTerm && (
+              <button
+                type="button"
+                onClick={() => setSearchTerm("")}
+                className="absolute inset-y-0 right-0 flex items-center pr-2.5 text-xs text-gray-400 hover:text-gray-600 cursor-pointer"
+                title="Clear search"
+              >
+                ✕
               </button>
-            )
-          )}
+            )}
+          </div>
+
+          {/* Status Filter */}
+          <div className="inline-flex rounded-xl bg-gray-100 p-1 border border-gray-200 overflow-x-auto">
+            {["all", "pending", "processing", "shipped", "delivered", "cancelled"].map(
+              (statusKey) => (
+                <button
+                  key={statusKey}
+                  type="button"
+                  onClick={() => setFilter(statusKey)}
+                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold capitalize transition-all cursor-pointer whitespace-nowrap ${filter === statusKey
+                      ? "bg-white text-gray-900 shadow-xs"
+                      : "text-gray-600 hover:text-gray-900"
+                    }`}
+                >
+                  {statusKey}
+                </button>
+              )
+            )}
+          </div>
         </div>
       </div>
 
@@ -103,8 +166,22 @@ export function OrdersList({ initialOrders = [], onUpdateStatus }) {
             <tbody className="divide-y divide-gray-100 font-medium">
               {filteredOrders.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-gray-400">
-                    No orders found.
+                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                    <p className="text-sm font-semibold text-gray-700">No matching orders found</p>
+                    <p className="text-xs text-gray-400 mt-1">
+                      {searchTerm
+                        ? `No orders found matching "${searchTerm}". Try checking the Order ID or phone number.`
+                        : "There are no orders in this category."}
+                    </p>
+                    {searchTerm && (
+                      <button
+                        type="button"
+                        onClick={() => setSearchTerm("")}
+                        className="mt-3 text-xs font-semibold text-emerald-600 hover:text-emerald-700 underline cursor-pointer"
+                      >
+                        Clear search
+                      </button>
+                    )}
                   </td>
                 </tr>
               ) : (

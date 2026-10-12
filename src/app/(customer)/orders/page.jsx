@@ -4,6 +4,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Modal } from "@/components/modal";
 import { useLanguage } from "@/hooks/languageContext";
 import { getMyOrders, trackOrder } from "@/lib/api/orders";
@@ -129,8 +130,62 @@ export default function OrdersPage() {
     }
   };
 
+  const searchParams = useSearchParams();
+  const paymentStatusParam = searchParams.get("payment");
+  const placedOrderIdParam = searchParams.get("placed");
+  const failReasonParam = searchParams.get("reason");
+
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      {/* Payment Gateway Callback Notifications */}
+      {paymentStatusParam === "success" && (
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50/90 p-5 shadow-sm flex items-start gap-4">
+          <span className="text-2xl">🎉</span>
+          <div className="space-y-1">
+            <h3 className="text-sm font-black text-emerald-900">
+              {language === "bn" ? "পেমেন্ট সফলভাবে সম্পন্ন হয়েছে!" : "Payment Successfully Completed!"}
+            </h3>
+            <p className="text-xs text-emerald-800">
+              {language === "bn"
+                ? `অর্ডার #${placedOrderIdParam || ""} এর পেমেন্ট সফল হয়েছে। আমরা শীঘ্রই আপনার ডেলিভারি প্রসেস শুরু করব।`
+                : `Payment for order #${placedOrderIdParam || ""} has been confirmed. We will dispatch your order soon.`}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {paymentStatusParam === "failed" && (
+        <div className="rounded-2xl border border-red-200 bg-red-50/90 p-5 shadow-sm flex items-start gap-4">
+          <span className="text-2xl">❌</span>
+          <div className="space-y-1">
+            <h3 className="text-sm font-black text-red-900">
+              {language === "bn" ? "পেমেন্ট সম্পন্ন হয়নি (ব্যর্থ)" : "Payment Failed"}
+            </h3>
+            <p className="text-xs text-red-800">
+              {language === "bn"
+                ? `আপনার পেমেন্ট প্রক্রিয়াটি ব্যর্থ হয়েছে।${failReasonParam ? ` (কারণ: ${failReasonParam})` : ""} আপনি অর্ডারটি পুনরায় চেক করে আবার চেষ্টা করতে পারেন বা ক্যাশ অন ডেলিভারিতে অর্ডার করতে পারেন।`
+                : `Your online payment was not successful.${failReasonParam ? ` (${failReasonParam})` : ""} You can try again or place an order with Cash on Delivery.`}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {paymentStatusParam === "cancelled" && (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50/90 p-5 shadow-sm flex items-start gap-4">
+          <span className="text-2xl">⚠️</span>
+          <div className="space-y-1">
+            <h3 className="text-sm font-black text-amber-900">
+              {language === "bn" ? "পেমেন্ট বাতিল করা হয়েছে" : "Payment Cancelled"}
+            </h3>
+            <p className="text-xs text-amber-800">
+              {language === "bn"
+                ? "আপনি SSLCommerz পেমেন্ট বাতিল করেছেন। কোনো টাকা কাটা হয়নি।"
+                : "You cancelled the SSLCommerz payment gateway transaction. No money was deducted."}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Header & Order Tracking Bar */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>

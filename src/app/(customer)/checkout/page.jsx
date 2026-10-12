@@ -255,10 +255,10 @@ export default function CheckoutPage() {
                       className="w-full rounded-2xl border border-gray-200 px-4 py-3 text-xs text-gray-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all bg-white"
                     >
                       <option value="Cash on Delivery">
-                        {language === "bn" ? "ক্যাশ অন ডেলিভারি (COD)" : "Cash on Delivery (COD)"}
+                        {language === "bn" ? "💵 ক্যাশ অন ডেলিভারি (COD)" : "💵 Cash on Delivery (COD)"}
                       </option>
                       <option value="online-payment">
-                        {language === "bn" ? "অনলাইন পেমেন্ট" : "Online Payment"}
+                        {language === "bn" ? "💳 অনলাইন পেমেন্ট (bKash, Nagad, কার্ড, SSLCommerz)" : "💳 Online Payment (bKash, Nagad, Cards - SSLCommerz)"}
                       </option>
                     </select>
                   </div>
