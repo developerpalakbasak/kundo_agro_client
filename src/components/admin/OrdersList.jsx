@@ -3,13 +3,15 @@
 import { useState } from "react";
 import Image from "next/image";
 import { getImageUrl } from "@/lib/api/axios";
+import { PAYMENT_CONFIG } from "@/lib/payment-config";
 
-export function OrdersList({ initialOrders = [], onUpdateStatus }) {
+export function OrdersList({ initialOrders = [], onUpdateStatus, onUpdatePaymentStatus }) {
   const [orders, setOrders] = useState(initialOrders);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [filter, setFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [updatingId, setUpdatingId] = useState(null);
+  const [updatingPaymentId, setUpdatingPaymentId] = useState(null);
 
   const handleStatusChange = async (orderId, newStatus) => {
     try {
@@ -30,6 +32,28 @@ export function OrdersList({ initialOrders = [], onUpdateStatus }) {
       alert(err.message || "Failed to update order status.");
     } finally {
       setUpdatingId(null);
+    }
+  };
+
+  const handlePaymentStatusChange = async (orderId, newPaymentStatus) => {
+    try {
+      setUpdatingPaymentId(orderId);
+      if (onUpdatePaymentStatus) {
+        await onUpdatePaymentStatus(orderId, newPaymentStatus);
+      }
+      setOrders((prev) =>
+        prev.map((o) => {
+          const id = o._id || o.id;
+          return id === orderId ? { ...o, paymentStatus: newPaymentStatus } : o;
+        })
+      );
+      if (selectedOrder && (selectedOrder._id || selectedOrder.id) === orderId) {
+        setSelectedOrder((prev) => (prev ? { ...prev, paymentStatus: newPaymentStatus } : null));
+      }
+    } catch (err) {
+      alert(err.message || "Failed to update payment status.");
+    } finally {
+      setUpdatingPaymentId(null);
     }
   };
 
@@ -159,14 +183,15 @@ export function OrdersList({ initialOrders = [], onUpdateStatus }) {
                 <th className="px-6 py-4">Customer</th>
                 <th className="px-6 py-4">Date</th>
                 <th className="px-6 py-4">Total</th>
-                <th className="px-6 py-4">Status</th>
+                <th className="px-6 py-4">Payment</th>
+                <th className="px-6 py-4">Order Status</th>
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 font-medium">
               {filteredOrders.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
                     <p className="text-sm font-semibold text-gray-700">No matching orders found</p>
                     <p className="text-xs text-gray-400 mt-1">
                       {searchTerm
@@ -191,10 +216,14 @@ export function OrdersList({ initialOrders = [], onUpdateStatus }) {
                   const phone = order.phone || order.user?.phone || "N/A";
                   const dateStr = order.createdAt ? new Date(order.createdAt).toLocaleDateString() : (order.date || "");
                   const total = order.totalAmount || order.total || 0;
+                  const paymentMethod = order.paymentMethod || "Cash on Delivery";
+                  const paymentStatus = order.paymentStatus || "pending";
 
                   return (
                     <tr key={orderId} className="hover:bg-gray-50/60 transition-colors">
-                      <td className="px-6 py-4 font-bold text-gray-900">#{orderId.slice(-6)}</td>
+                      <td className="px-6 py-4 font-bold text-gray-900">
+                        {order.orderId ? `#${order.orderId}` : `#${orderId.slice(-6)}`}
+                      </td>
                       <td className="px-6 py-4">
                         <p className="font-bold text-gray-900">{customerName}</p>
                         <p className="text-[11px] text-gray-500">{phone}</p>
@@ -202,6 +231,52 @@ export function OrdersList({ initialOrders = [], onUpdateStatus }) {
                       <td className="px-6 py-4 text-gray-500">{dateStr}</td>
                       <td className="px-6 py-4 font-bold text-emerald-600">
                         ৳{total.toLocaleString()}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="space-y-1.5">
+                          <div className="flex items-center gap-1.5">
+                            {(() => {
+                              const methodConfig = Object.values(PAYMENT_CONFIG).find(
+                                (c) => c.badge === paymentMethod || c.name === paymentMethod || c.id === paymentMethod
+                              );
+                              if (methodConfig?.logo) {
+                                return (
+                                  <div className="h-4 w-5 relative shrink-0 rounded bg-white p-0.5 border border-gray-100 flex items-center justify-center">
+                                    <Image
+                                      src={methodConfig.logo}
+                                      alt={paymentMethod}
+                                      width={20}
+                                      height={16}
+                                      className="h-full w-full object-contain"
+                                    />
+                                  </div>
+                                );
+                              }
+                              return <span className="text-xs">💵</span>;
+                            })()}
+                            <span className="inline-block font-bold text-[11px] text-gray-800">
+                              {paymentMethod}
+                            </span>
+                          </div>
+                          <div>
+                            <select
+                              disabled={updatingPaymentId === orderId}
+                              value={paymentStatus}
+                              onChange={(e) => handlePaymentStatusChange(orderId, e.target.value)}
+                              className={`rounded-md border px-2 py-0.5 text-[10px] font-bold transition-all cursor-pointer outline-none ${
+                                paymentStatus === "paid"
+                                  ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                  : paymentStatus === "failed"
+                                  ? "bg-rose-50 text-rose-700 border-rose-200"
+                                  : "bg-amber-50 text-amber-700 border-amber-200"
+                              }`}
+                            >
+                              <option value="pending">Payment: Pending</option>
+                              <option value="paid">Payment: Paid</option>
+                              <option value="failed">Payment: Failed</option>
+                            </select>
+                          </div>
+                        </div>
                       </td>
                       <td className="px-6 py-4">
                         <select
@@ -273,8 +348,103 @@ export function OrdersList({ initialOrders = [], onUpdateStatus }) {
               <p className="font-bold text-gray-900">{selectedOrder.customerName || selectedOrder.user?.name}</p>
               <p className="text-gray-600">{selectedOrder.phone || selectedOrder.user?.phone}</p>
               <p className="text-gray-500">
-                {selectedOrder.shippingAddress || selectedOrder.address || "Standard Delivery"}
+                {selectedOrder.shippingAddress || selectedOrder.address || "Standard Delivery"}, {selectedOrder.city || ""}
               </p>
+            </div>
+
+            {/* Payment & Manual Verification Details */}
+            <div className="rounded-xl border border-emerald-100 bg-emerald-50/50 p-4 space-y-2.5 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-emerald-900 uppercase tracking-wider block text-[10px]">
+                  Payment & Verification
+                </span>
+                <select
+                  disabled={updatingPaymentId === (selectedOrder._id || selectedOrder.id)}
+                  value={selectedOrder.paymentStatus || "pending"}
+                  onChange={(e) =>
+                    handlePaymentStatusChange(selectedOrder._id || selectedOrder.id, e.target.value)
+                  }
+                  className={`rounded-lg border px-2.5 py-1 text-xs font-bold transition-all cursor-pointer outline-none ${
+                    selectedOrder.paymentStatus === "paid"
+                      ? "bg-emerald-600 text-white border-emerald-600"
+                      : selectedOrder.paymentStatus === "failed"
+                      ? "bg-rose-600 text-white border-rose-600"
+                      : "bg-amber-500 text-white border-amber-500"
+                  }`}
+                >
+                  <option value="pending">Status: Pending</option>
+                  <option value="paid">Status: Paid</option>
+                  <option value="failed">Status: Failed</option>
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 pt-1 text-xs">
+                <div>
+                  <span className="text-gray-500 block text-[11px]">Method:</span>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    {(() => {
+                      const methodConfig = Object.values(PAYMENT_CONFIG).find(
+                        (c) =>
+                          c.badge === selectedOrder.paymentMethod ||
+                          c.name === selectedOrder.paymentMethod ||
+                          c.id === selectedOrder.paymentMethod
+                      );
+                      if (methodConfig?.logo) {
+                        return (
+                          <div className="h-5 w-6 relative shrink-0 rounded bg-white p-0.5 border border-gray-100 flex items-center justify-center">
+                            <Image
+                              src={methodConfig.logo}
+                              alt={selectedOrder.paymentMethod}
+                              width={24}
+                              height={20}
+                              className="h-full w-full object-contain"
+                            />
+                          </div>
+                        );
+                      }
+                      return <span className="text-xs">💵</span>;
+                    })()}
+                    <span className="font-bold text-gray-800">{selectedOrder.paymentMethod || "Cash on Delivery"}</span>
+                  </div>
+                </div>
+                <div>
+                  <span className="text-gray-500 block text-[11px]">Amount:</span>
+                  <span className="font-bold text-emerald-700">
+                    ৳{(selectedOrder.totalAmount || selectedOrder.total || 0).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+
+              {/* Show Manual Transaction Details if available */}
+              {(selectedOrder.paymentDetails?.transactionId || selectedOrder.paymentDetails?.senderNumber) && (
+                <div className="mt-2 rounded-lg border border-emerald-200 bg-white p-3 space-y-1.5 text-xs">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 block">
+                    Customer Submitted Trx Details
+                  </span>
+                  {selectedOrder.paymentDetails.senderNumber && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-500">Sender Number:</span>
+                      <span className="font-mono font-bold text-gray-900 select-all">
+                        {selectedOrder.paymentDetails.senderNumber}
+                      </span>
+                    </div>
+                  )}
+                  {selectedOrder.paymentDetails.transactionId && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-500">Transaction ID (TrxID):</span>
+                      <span className="font-mono font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded select-all">
+                        {selectedOrder.paymentDetails.transactionId}
+                      </span>
+                    </div>
+                  )}
+                  {selectedOrder.paymentDetails.bankName && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-500">Bank Name:</span>
+                      <span className="font-semibold text-gray-800">{selectedOrder.paymentDetails.bankName}</span>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Items */}

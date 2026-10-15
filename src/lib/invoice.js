@@ -17,6 +17,11 @@ export function printOrderInvoice(order) {
   const deliveryFee = Number(order.deliveryFee || 0);
   const total = Number(order.total || subtotal + deliveryFee);
 
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  const logoUrl = `${origin}/kundu_logo.png`;
+  const transactionId = order.paymentDetails?.transactionId || "";
+  const senderNumber = order.paymentDetails?.senderNumber || "";
+
   const itemsHtml = (order.items || [])
     .map(
       (item, index) => `
@@ -62,6 +67,17 @@ export function printOrderInvoice(order) {
             margin-bottom: 24px;
             border-bottom: 2px solid #059669;
             padding-bottom: 16px;
+          }
+          .company-logo-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+          }
+          .company-logo {
+            height: 52px;
+            width: auto;
+            max-width: 160px;
+            object-contain: contain;
           }
           .company-title {
             font-size: 22px;
@@ -132,11 +148,16 @@ export function printOrderInvoice(order) {
           <table class="header-table">
             <tr>
               <td>
-                <h1 class="company-title">🌱 Kundu Agro & Fisheries</h1>
-                <div class="company-subtitle">Premium Fisheries, Seeds & Agricultural Products Supplier</div>
-                <div class="company-subtitle">Email: support@kunduagro.com | Phone: +880 1700-000000</div>
+                <div style="display: flex; align-items: center; gap: 14px;">
+                  <img src="${logoUrl}" alt="Kundu Agro & Fisheries" class="company-logo" onerror="this.style.display='none'" />
+                  <div>
+                    <h1 class="company-title">Kundu Agro & Fisheries</h1>
+                    <div class="company-subtitle">Premium Fisheries, Seeds & Agricultural Products Supplier</div>
+                    <div class="company-subtitle">Email: support@kunduagro.com | Phone: +880 1700-000000</div>
+                  </div>
+                </div>
               </td>
-              <td>
+              <td style="vertical-align: top;">
                 <h2 class="invoice-title">OFFICIAL INVOICE</h2>
                 <div style="text-align: right; font-size: 13px; font-weight: bold; color: #047857; margin-top: 4px;">
                   #${orderId}
@@ -168,6 +189,20 @@ export function printOrderInvoice(order) {
                   <div style="font-size: 12px; color: #374151;">Method: <strong>${paymentMethod}</strong></div>
                   <div style="font-size: 12px; color: #374151; margin-top: 2px;">Payment Status: <strong>${paymentStatus}</strong></div>
                   <div style="font-size: 12px; color: #374151; margin-top: 2px;">Order Status: <strong style="color: #047857;">${status}</strong></div>
+                  ${
+                    transactionId
+                      ? `<div style="font-size: 12px; color: #374151; margin-top: 4px; padding-top: 4px; border-top: 1px dashed #e5e7eb;">
+                          TrxID: <strong style="font-family: monospace; color: #047857;">${transactionId}</strong>
+                         </div>`
+                      : ""
+                  }
+                  ${
+                    senderNumber
+                      ? `<div style="font-size: 12px; color: #374151; margin-top: 2px;">
+                          Sender: <strong style="font-family: monospace;">${senderNumber}</strong>
+                         </div>`
+                      : ""
+                  }
                 </div>
               </td>
             </tr>
@@ -209,7 +244,14 @@ export function printOrderInvoice(order) {
         </div>
         <script>
           window.onload = function() {
-            window.print();
+            var img = document.querySelector('.company-logo');
+            if (img && !img.complete) {
+              img.onload = function() { window.print(); };
+              img.onerror = function() { window.print(); };
+              setTimeout(function() { window.print(); }, 800);
+            } else {
+              window.print();
+            }
           };
         </script>
       </body>

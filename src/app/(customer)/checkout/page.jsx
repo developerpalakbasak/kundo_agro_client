@@ -6,8 +6,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/cartContext";
 import { useLanguage } from "@/hooks/languageContext";
-import { createOrder, initSSLCommerzPayment } from "@/lib/api/orders";
+import { createOrder } from "@/lib/api/orders";
 import { getImageUrl } from "@/lib/api/axios";
+import { PAYMENT_CONFIG, PAYMENT_METHODS } from "@/lib/payment-config";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -19,7 +20,10 @@ export default function CheckoutPage() {
     phone: "",
     address: "",
     city: "",
-    paymentMethod: "Cash on Delivery",
+    paymentMethod: PAYMENT_METHODS.COD,
+    senderNumber: "",
+    transactionId: "",
+    bankName: "",
     notes: "",
   });
 
@@ -28,6 +32,7 @@ export default function CheckoutPage() {
   const [errorMessage, setErrorMessage] = useState("");
 
   const grandTotal = totalPrice + (items.length > 0 ? deliveryFee : 0);
+  const activePaymentConfig = PAYMENT_CONFIG[formData.paymentMethod] || PAYMENT_CONFIG[PAYMENT_METHODS.COD];
 
   const handleChange = (e) => {
     setFormData((prev) => ({
@@ -58,6 +63,18 @@ export default function CheckoutPage() {
       return;
     }
 
+    // Manual payment transaction verification requirement
+    if (activePaymentConfig.requiresTransaction) {
+      if (!formData.senderNumber.trim() || !formData.transactionId.trim()) {
+        setErrorMessage(
+          language === "bn"
+            ? `অনুগ্রহ করে ${activePaymentConfig.nameBn} পেমেন্টের প্রেরক নম্বর এবং TrxID প্রদান করুন।`
+            : `Please provide your sender number / account and Transaction ID for ${activePaymentConfig.name}.`
+        );
+        return;
+      }
+    }
+
     try {
       setSubmitting(true);
       const payload = {
@@ -65,9 +82,12 @@ export default function CheckoutPage() {
         phone: formData.phone,
         address: formData.address,
         city: formData.city,
-        paymentMethod: formData.paymentMethod,
+        paymentMethod: activePaymentConfig.badge || formData.paymentMethod,
         notes: formData.notes,
         deliveryFee: deliveryFee,
+        senderNumber: activePaymentConfig.requiresTransaction ? formData.senderNumber.trim() : null,
+        transactionId: activePaymentConfig.requiresTransaction ? formData.transactionId.trim() : null,
+        bankName: formData.paymentMethod === PAYMENT_METHODS.BANK ? activePaymentConfig.bankName : null,
         items: items.map((item) => ({
           product: item.product._id || item.product.id,
           name: item.product.name,
@@ -84,26 +104,6 @@ export default function CheckoutPage() {
         const createdOrder = res.order;
         const createdOrderId = createdOrder?.orderId || "";
         clearCart();
-
-        // Check if online payment selected
-        if (formData.paymentMethod === "online-payment") {
-          try {
-            const payRes = await initSSLCommerzPayment(createdOrderId);
-            const redirectUrl = payRes?.gatewayUrl || payRes?.data?.gatewayUrl;
-            if (redirectUrl) {
-              window.location.href = redirectUrl;
-              return;
-            } else {
-              setErrorMessage(payRes?.message || payRes?.failedreason || "Payment gateway redirect failed.");
-              return;
-            }
-          } catch (payErr) {
-            console.error("SSLCommerz payment init error:", payErr);
-            setErrorMessage(payErr.message || "Failed to initialize online payment.");
-            return;
-          }
-        }
-
         router.push(`/orders?placed=${encodeURIComponent(createdOrderId)}`);
       } else {
         setErrorMessage(res?.message || "Failed to place order.");
@@ -244,25 +244,228 @@ export default function CheckoutPage() {
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1">
-                      {language === "bn" ? "পেমেন্ট মাধ্যম *" : "Payment Method *"}
-                    </label>
-                    <select
-                      name="paymentMethod"
-                      value={formData.paymentMethod}
-                      onChange={handleChange}
-                      className="w-full rounded-2xl border border-gray-200 px-4 py-3 text-xs text-gray-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all bg-white"
-                    >
-                      <option value="Cash on Delivery">
-                        {language === "bn" ? "💵 ক্যাশ অন ডেলিভারি (COD)" : "💵 Cash on Delivery (COD)"}
-                      </option>
-                      <option value="online-payment">
-                        {language === "bn" ? "💳 অনলাইন পেমেন্ট (bKash, Nagad, কার্ড, SSLCommerz)" : "💳 Online Payment (bKash, Nagad, Cards - SSLCommerz)"}
-                      </option>
-                    </select>
+                  <div className="col-span-1 sm:col-span-2">
+                    <div className="flex items-center justify-between mb-2.5">
+                      <label className="block text-xs font-bold text-gray-800 uppercase tracking-wider">
+                        {language === "bn" ? "পেমেন্ট মাধ্যম বেছে নিন" : "Select Payment Method"} *
+                      </label>
+                      <span className="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100">
+                        {language === "bn" ? "নিরাপদ লেনদেন" : "100% Secure Checkout"}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {Object.values(PAYMENT_CONFIG).map((method) => {
+                        const isSelected = formData.paymentMethod === method.id;
+                        return (
+                          <div
+                            key={method.id}
+                            onClick={() =>
+                              setFormData((prev) => ({
+                                ...prev,
+                                paymentMethod: method.id,
+                              }))
+                            }
+                            className={`group relative flex flex-col justify-between p-4 rounded-2xl border-2 transition-all duration-200 cursor-pointer text-left ${
+                              isSelected
+                                ? "border-emerald-600 bg-linear-to-b from-emerald-50/90 to-white shadow-md ring-4 ring-emerald-500/10 scale-[1.01]"
+                                : "border-gray-200/90 bg-white hover:border-gray-300 hover:shadow-xs hover:-translate-y-0.5"
+                            }`}
+                          >
+                            <div className="flex items-start justify-between gap-3 mb-3">
+                              {/* Brand Logo Box */}
+                              <div className="flex h-11 w-14 shrink-0 items-center justify-center rounded-xl bg-white border border-gray-100 p-1.5 shadow-2xs group-hover:scale-105 transition-transform">
+                                {method.logo ? (
+                                  <Image
+                                    src={method.logo}
+                                    alt={method.name}
+                                    width={46}
+                                    height={46}
+                                    className="h-full w-full object-contain"
+                                  />
+                                ) : (
+                                  <span className="text-2xl">{method.icon}</span>
+                                )}
+                              </div>
+
+                              {/* Radio Selection Pill */}
+                              <div
+                                className={`flex items-center justify-center h-5 w-5 rounded-full border transition-all ${
+                                  isSelected
+                                    ? "border-emerald-600 bg-emerald-600 text-white shadow-xs"
+                                    : "border-gray-300 bg-gray-50 group-hover:border-gray-400"
+                                }`}
+                              >
+                                {isSelected ? (
+                                  <svg
+                                    className="w-3 h-3 text-white"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={3}
+                                      d="M5 13l4 4L19 7"
+                                    />
+                                  </svg>
+                                ) : null}
+                              </div>
+                            </div>
+
+                            {/* Content */}
+                            <div className="space-y-1">
+                              <h4
+                                className={`text-xs font-extrabold leading-snug break-words transition-colors ${
+                                  isSelected ? "text-emerald-950" : "text-gray-900 group-hover:text-emerald-700"
+                                }`}
+                              >
+                                {language === "bn" ? method.nameBn : method.name}
+                              </h4>
+                              <div className="flex items-center gap-1.5 pt-0.5">
+                                <span
+                                  className={`inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-md ${
+                                    method.requiresTransaction
+                                      ? "bg-amber-50 text-amber-800 border border-amber-200/60"
+                                      : "bg-emerald-50 text-emerald-800 border border-emerald-200/60"
+                                  }`}
+                                >
+                                  {method.requiresTransaction
+                                    ? language === "bn"
+                                      ? "ম্যানুয়াল TrxID"
+                                      : "Manual TrxID"
+                                    : language === "bn"
+                                    ? "ক্যাশ অন ডেলিভারি"
+                                    : "Cash On Delivery"}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
+
+                {/* Manual Payment Information & Transaction Form */}
+                {activePaymentConfig.requiresTransaction && (
+                  <div className="rounded-3xl border-2 border-emerald-500/25 bg-linear-to-b from-emerald-50/70 via-white to-white p-5 sm:p-6 space-y-5 shadow-sm animate-in fade-in transition-all">
+                    {/* Header with Large Logo and Instructions */}
+                    <div className="flex items-start gap-4 pb-4 border-b border-gray-100">
+                      <div className="flex h-14 w-16 shrink-0 items-center justify-center rounded-2xl bg-white border border-gray-200/80 p-2 shadow-xs">
+                        {activePaymentConfig.logo ? (
+                          <Image
+                            src={activePaymentConfig.logo}
+                            alt={activePaymentConfig.name}
+                            width={52}
+                            height={52}
+                            className="h-full w-full object-contain"
+                          />
+                        ) : (
+                          <span className="text-3xl">{activePaymentConfig.icon}</span>
+                        )}
+                      </div>
+                      <div className="space-y-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h4 className="text-sm font-black text-gray-900">
+                            {language === "bn"
+                              ? `${activePaymentConfig.nameBn} পেমেন্ট নির্দেশিকা`
+                              : `${activePaymentConfig.name} Payment Instructions`}
+                          </h4>
+                          <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">
+                            Step 2: Transfer & Submit
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-600 leading-relaxed font-medium">
+                          {language === "bn" ? activePaymentConfig.instructionBn : activePaymentConfig.instructionEn}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Account Details Box */}
+                    <div className="rounded-2xl border border-emerald-200 bg-white p-4 space-y-2.5 text-xs shadow-2xs">
+                      {activePaymentConfig.accountType && (
+                        <div className="flex justify-between items-center text-gray-600">
+                          <span className="font-semibold">{language === "bn" ? "অ্যাকাউন্টের ধরণ:" : "Account Type:"}</span>
+                          <span className="font-bold text-gray-900 bg-gray-100 px-2.5 py-0.5 rounded-md">
+                            {activePaymentConfig.accountType}
+                          </span>
+                        </div>
+                      )}
+                      {activePaymentConfig.accountNumber && (
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center bg-emerald-50/80 border border-emerald-200/70 p-3 rounded-xl gap-1">
+                          <span className="font-bold text-emerald-900 text-xs">
+                            {language === "bn" ? "অ্যাকাউন্ট / মোবাইল নম্বর:" : "Account / Mobile No:"}
+                          </span>
+                          <span className="font-mono font-black text-base text-emerald-800 tracking-wider select-all">
+                            {activePaymentConfig.accountNumber}
+                          </span>
+                        </div>
+                      )}
+                      {activePaymentConfig.bankName && (
+                        <div className="flex justify-between items-center text-gray-600">
+                          <span className="font-semibold">{language === "bn" ? "ব্যাংকের নাম:" : "Bank Name:"}</span>
+                          <span className="font-bold text-gray-900">{activePaymentConfig.bankName}</span>
+                        </div>
+                      )}
+                      {activePaymentConfig.accountName && (
+                        <div className="flex justify-between items-center text-gray-600">
+                          <span className="font-semibold">{language === "bn" ? "অ্যাকাউন্টের নাম:" : "Account Name:"}</span>
+                          <span className="font-bold text-gray-900">{activePaymentConfig.accountName}</span>
+                        </div>
+                      )}
+                      {activePaymentConfig.branchName && (
+                        <div className="flex justify-between items-center text-gray-600">
+                          <span className="font-semibold">{language === "bn" ? "শাখা / Branch:" : "Branch:"}</span>
+                          <span className="font-bold text-gray-900">{activePaymentConfig.branchName}</span>
+                        </div>
+                      )}
+                      {activePaymentConfig.routingNumber && (
+                        <div className="flex justify-between items-center text-gray-600">
+                          <span className="font-semibold">{language === "bn" ? "রাউটিং নম্বর:" : "Routing No:"}</span>
+                          <span className="font-mono font-bold text-gray-900">{activePaymentConfig.routingNumber}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between items-center border-t border-gray-100 pt-3 text-gray-900">
+                        <span className="font-bold text-xs">{language === "bn" ? "পরিশোধযোগ্য মোট টাকা:" : "Amount to Pay:"}</span>
+                        <span className="text-base font-black text-emerald-600">৳{grandTotal.toLocaleString()}</span>
+                      </div>
+                    </div>
+
+                    {/* Sender and TrxID Inputs */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
+                      <div>
+                        <label className="block text-xs font-bold text-gray-800 mb-1.5">
+                          {language === "bn" ? activePaymentConfig.senderLabelBn : activePaymentConfig.senderLabelEn} *
+                        </label>
+                        <input
+                          type="text"
+                          name="senderNumber"
+                          required
+                          value={formData.senderNumber}
+                          onChange={handleChange}
+                          placeholder={language === "bn" ? "যেমন: 017XXXXXXXX" : "e.g., 017XXXXXXXX"}
+                          className="w-full rounded-xl border border-gray-300 bg-white px-3.5 py-3 text-xs text-gray-900 font-medium placeholder-gray-400 focus:border-emerald-600 focus:outline-none focus:ring-3 focus:ring-emerald-500/20 shadow-2xs transition-all"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-gray-800 mb-1.5">
+                          {language === "bn" ? activePaymentConfig.trxLabelBn : activePaymentConfig.trxLabelEn} *
+                        </label>
+                        <input
+                          type="text"
+                          name="transactionId"
+                          required
+                          value={formData.transactionId}
+                          onChange={handleChange}
+                          placeholder={language === "bn" ? "যেমন: 9K72BXYZ" : "e.g., 9K72BXYZ"}
+                          className="w-full rounded-xl border border-gray-300 bg-white px-3.5 py-3 text-xs text-gray-900 font-mono font-bold uppercase placeholder-gray-400 focus:border-emerald-600 focus:outline-none focus:ring-3 focus:ring-emerald-500/20 shadow-2xs transition-all"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 <div>
                   <label className="block text-xs font-bold text-gray-700 mb-1">

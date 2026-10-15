@@ -10,6 +10,7 @@ import { useLanguage } from "@/hooks/languageContext";
 import { getMyOrders, trackOrder } from "@/lib/api/orders";
 import { printOrderInvoice } from "@/lib/invoice";
 import Loader from "@/components/Loader";
+import { PAYMENT_CONFIG } from "@/lib/payment-config";
 
 export default function OrdersPage() {
   const { t, language } = useLanguage();
@@ -434,12 +435,46 @@ export default function OrdersPage() {
                 <p className="text-xs font-bold text-primary uppercase tracking-wider">
                   💳 {language === "bn" ? "পেমেন্ট মাধ্যম" : "Payment Method"}
                 </p>
-                <span className="inline-block rounded-lg bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-900">
-                  {selectedOrder.paymentMethod || "Cash on Delivery"}
-                </span>
+                <div className="flex items-center gap-2">
+                  {(() => {
+                    const methodConfig = Object.values(PAYMENT_CONFIG).find(
+                      (c) =>
+                        c.badge === selectedOrder.paymentMethod ||
+                        c.name === selectedOrder.paymentMethod ||
+                        c.id === selectedOrder.paymentMethod
+                    );
+                    if (methodConfig?.logo) {
+                      return (
+                        <div className="h-6 w-8 relative shrink-0 rounded-lg bg-white p-1 border border-gray-200 flex items-center justify-center shadow-2xs">
+                          <Image
+                            src={methodConfig.logo}
+                            alt={selectedOrder.paymentMethod}
+                            width={32}
+                            height={24}
+                            className="h-full w-full object-contain"
+                          />
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
+                  <span className="inline-block rounded-lg bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-900">
+                    {selectedOrder.paymentMethod || "Cash on Delivery"}
+                  </span>
+                </div>
                 <p className="text-[11px] text-gray-500 pt-1">
                   Status: <span className="font-bold text-gray-700 capitalize">{selectedOrder.paymentStatus || "pending"}</span>
                 </p>
+                {selectedOrder.paymentDetails?.transactionId && (
+                  <p className="text-[11px] text-gray-600 font-medium">
+                    TrxID: <span className="font-mono font-bold text-gray-900">{selectedOrder.paymentDetails.transactionId}</span>
+                  </p>
+                )}
+                {selectedOrder.paymentDetails?.senderNumber && (
+                  <p className="text-[11px] text-gray-600 font-medium">
+                    Sender: <span className="font-mono font-bold text-gray-900">{selectedOrder.paymentDetails.senderNumber}</span>
+                  </p>
+                )}
               </div>
             </div>
 

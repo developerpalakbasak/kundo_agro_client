@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getAdminOrders, updateOrderStatus } from "@/lib/api/admin";
+import { getAdminOrders, updateOrderStatus, updateOrderPaymentStatus } from "@/lib/api/admin";
 import { OrdersList } from "@/components/admin/OrdersList";
 
 export default function AdminOrdersPage() {
@@ -36,6 +36,10 @@ export default function AdminOrdersPage() {
     await updateOrderStatus(orderId, newStatus);
   };
 
+  const handleUpdatePaymentStatus = async (orderId, newPaymentStatus) => {
+    await updateOrderPaymentStatus(orderId, newPaymentStatus);
+  };
+
   if (isLoading) {
     return (
       <div className="flex min-h-[400px] items-center justify-center text-emerald-600">
@@ -47,5 +51,11 @@ export default function AdminOrdersPage() {
     );
   }
 
-  return <OrdersList initialOrders={orders} onUpdateStatus={handleUpdateStatus} />;
+  return (
+    <OrdersList
+      initialOrders={orders}
+      onUpdateStatus={handleUpdateStatus}
+      onUpdatePaymentStatus={handleUpdatePaymentStatus}
+    />
+  );
 }
